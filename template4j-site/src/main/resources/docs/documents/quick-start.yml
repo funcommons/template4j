@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 快速开始
+
+
+    环境要求(Java 17+, Spring Boot 3.x)、Maven 依赖配置及第一个渲染示例'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

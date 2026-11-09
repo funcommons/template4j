@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# fne 第一个非空值
+
+
+    内置函数 fne() 返回第一个非空值，空字符串、空列表/Map、null 均视为空'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

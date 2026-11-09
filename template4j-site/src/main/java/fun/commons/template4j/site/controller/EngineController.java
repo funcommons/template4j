@@ -1,8 +1,8 @@
-package fun.commons.template4j.demo.controller;
+package fun.commons.template4j.site.controller;
 
 import fun.commons.template4j.core.RenderEngine;
-import fun.commons.template4j.demo.common.ApiResponse;
-import fun.commons.template4j.demo.config.TraceIdFilter;
+import fun.commons.template4j.site.common.ApiResponse;
+import fun.commons.template4j.site.config.TraceIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

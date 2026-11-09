@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 不渲染 ...&
+
+
+    使用 & 后缀让字段值原样返回不渲染，也适用于 $...& 变量形式'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

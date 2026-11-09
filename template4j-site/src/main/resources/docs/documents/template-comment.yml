@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 注释 #...
+
+
+    使用 # 前缀的字段作为注释，渲染时被忽略'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

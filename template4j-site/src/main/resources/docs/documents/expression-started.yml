@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 行内表达式 {=...}
+
+
+    使用 {=...} 行内表达式计算数据，支持 Java 语法'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"status":"{= @age >= 18 ? \"已成年\" : \"未成年\" }"}'
+    - name: data
+      value: '{"age": 20}'
+    result: 已成年

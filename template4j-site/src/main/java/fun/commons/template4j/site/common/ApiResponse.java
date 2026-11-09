@@ -1,6 +1,6 @@
-package fun.commons.template4j.demo.common;
+package fun.commons.template4j.site.common;
 
-import fun.commons.template4j.demo.dto.ApiError;
+import fun.commons.template4j.site.dto.ApiError;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

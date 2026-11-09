@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 变量 $...
+
+
+    使用 $ 前缀定义模板变量，变量被引用而非直接输出'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

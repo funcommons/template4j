@@ -1,13 +1,13 @@
-package fun.commons.template4j.demo.api;
+package fun.commons.template4j.site.api;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import fun.commons.template4j.demo.config.TraceIdFilter;
+import fun.commons.template4j.site.config.TraceIdFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import fun.commons.template4j.demo.DemoApplication;
+import fun.commons.template4j.site.SiteApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(classes = DemoApplication.class)
+@SpringBootTest(classes = SiteApplication.class)
 @AutoConfigureMockMvc
 class RenderApiIT {
 

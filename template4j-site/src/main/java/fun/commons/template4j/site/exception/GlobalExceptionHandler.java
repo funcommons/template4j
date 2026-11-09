@@ -1,9 +1,9 @@
-package fun.commons.template4j.demo.exception;
+package fun.commons.template4j.site.exception;
 
-import fun.commons.template4j.demo.dto.ApiError;
-import fun.commons.template4j.demo.common.ApiResponse;
-import fun.commons.template4j.demo.common.ErrorCode;
-import fun.commons.template4j.demo.config.TraceIdFilter;
+import fun.commons.template4j.site.dto.ApiError;
+import fun.commons.template4j.site.common.ApiResponse;
+import fun.commons.template4j.site.common.ErrorCode;
+import fun.commons.template4j.site.config.TraceIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

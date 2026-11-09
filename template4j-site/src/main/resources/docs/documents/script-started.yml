@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 脚本声明 {%...%}
+
+
+    使用 {%...%} 编写多行 Groovy 脚本，支持 Java 语法、局部变量和 return'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

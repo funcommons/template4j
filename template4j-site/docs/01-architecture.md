@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    template4j-demo (Spring Boot)             │
+│                    template4j-site (Spring Boot)             │
 │                                                               │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐       │
 │  │ Controller  │ -> │  Service    │ -> │  Engine     │       │
@@ -67,7 +67,7 @@
 
 ```
 demo/
-├── DemoApplication.java
+├── SiteApplication.java
 ├── common/
 │   ├── ApiResponse.java         # 响应信封
 │   ├── ApiError.java            # 错误子项

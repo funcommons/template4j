@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 渲染前事件 $enter{}
+
+
+    在子节点渲染前执行脚本，可操作 _template 对象进行模板预处理'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

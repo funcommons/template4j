@@ -2,7 +2,7 @@
   <div class="docs">
     <h2>{{ t('docs.title') }}</h2>
     <el-card>
-      <div v-if="loading" class="loading">加载中...</div>
+      <div v-if="loading" class="loading">{{ t('docs.loading') }}</div>
       <div v-else-if="error" class="error">{{ error }}</div>
       <div v-else-if="detail">
         <h3>{{ detail.title }}</h3>
@@ -33,15 +33,15 @@
                   size="small"
                   :loading="running[idx]"
                   @click="runSection(idx)"
-                >▶ 运行</el-button>
+                >▶ {{ t('docs.run') }}</el-button>
                 <el-button size="small" @click="openSectionInTry(idx)">{{ t('learn.openInTry') }}</el-button>
               </div>
               <div v-if="results[idx]" class="jr-result">
-                <div class="var-label">result</div>
+                <div class="var-label">{{ t('common.output') }}</div>
                 <pre class="code-block">{{ results[idx] }}</pre>
               </div>
               <div v-if="section.content.code" class="var-row">
-                <div class="var-label">Java 调用代码</div>
+                <div class="var-label">{{ t('docs.javaCallCode') }}</div>
                 <pre class="code-block">{{ section.content.code.trim() }}</pre>
               </div>
             </div>
@@ -78,7 +78,7 @@ onMounted(async () => {
     detail.value = await getExample('intro-home')
     hydrateVars()
   } catch (e: any) {
-    error.value = '无法加载首页文档: ' + (e?.message || String(e))
+    error.value = t('docs.loadError') + ': ' + (e?.message || String(e))
   } finally {
     loading.value = false
   }
@@ -112,7 +112,7 @@ async function runSection(idx: number) {
   running[idx] = true
   try {
     let dataObj: Record<string, any> = {}
-    try { dataObj = JSON.parse(data || '{}') } catch { results[idx] = 'data 字段不是合法 JSON'; running[idx] = false; return }
+    try { dataObj = JSON.parse(data || '{}') } catch { results[idx] = t('docs.invalidJsonData'); running[idx] = false; return }
     const r = await render({
       template_type: detail.value.template_type || 'json',
       template,
@@ -120,7 +120,7 @@ async function runSection(idx: number) {
     })
     results[idx] = JSON.stringify(r.rendered, null, 2)
   } catch (e: any) {
-    results[idx] = '渲染失败: ' + (e?.message || JSON.stringify(e))
+    results[idx] = t('docs.renderError') + ': ' + (e?.message || JSON.stringify(e))
   } finally {
     running[idx] = false
   }

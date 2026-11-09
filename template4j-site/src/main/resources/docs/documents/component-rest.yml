@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 接口调用 rest
+
+
+    使用 @class:rest 发起 HTTP 请求，支持 GET/POST/PUT/DELETE 和 success/error 处理'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"@class":"rest","url":"http://example.com","method":"get"}'
+    - name: data
+      value: '{}'
+    result: ''

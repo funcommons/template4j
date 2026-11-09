@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# key 转义 <&...&>
+
+
+    对特殊 key（如 # 开头）使用 <&...&> 包裹使其成为字面量'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

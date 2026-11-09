@@ -1,10 +1,10 @@
-package fun.commons.template4j.demo.service;
+package fun.commons.template4j.site.service;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import fun.commons.template4j.demo.dto.ExampleDetail;
-import fun.commons.template4j.demo.dto.ExampleMeta;
-import fun.commons.template4j.demo.exception.BizException;
+import fun.commons.template4j.site.dto.ExampleDetail;
+import fun.commons.template4j.site.dto.ExampleMeta;
+import fun.commons.template4j.site.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;

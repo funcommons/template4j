@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: template4j-demo
+    name: template4j-site
   jackson:
     property-naming-strategy: SNAKE_CASE
     serialization:
@@ -13,6 +13,11 @@ template4j:
   demo:
     render-timeout-ms: 5000
     max-template-size: 65536
+    rest-base-url: http://localhost:${server.port}
+    rate-limit:
+      enabled: true
+      capacity: 10
+      refill-minutes: 1
 
 logging:
   level:

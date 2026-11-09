@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 局部数据 @
+
+
+    使用 @ 字段定义局部数据，作用域为当前节点及子节点，可覆盖上层数据'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

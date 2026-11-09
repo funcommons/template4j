@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# JSONPath 参考
+
+
+    fastjson2 JSONPath 语法参考：支持的操作符、过滤器和 deepScan 用法'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

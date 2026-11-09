@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 合并子项 *
+
+
+    使用 * 节点将其子字段合并到当前层级，遵循后覆盖前的优先级规则'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

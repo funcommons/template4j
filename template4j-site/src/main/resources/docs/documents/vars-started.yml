@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 变量 {$...}
+
+
+    使用 $name 语法定义和引用变量，理解变量作用域规则'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"msg":"{@name}喜欢{@friend}"}'
+    - name: data
+      value: '{"name": "小明", "friend": "小红"}'
+    result: 小明喜欢小红

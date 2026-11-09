@@ -4,178 +4,42 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import MarkdownIt from 'markdown-it'
+import DOMPurify from 'dompurify'
+
+// Module-level singleton: the parser holds no per-render mutable state.
+// html: true lets raw HTML through the markdown parser; safety is delegated
+// entirely to DOMPurify below.
+const md = new MarkdownIt({ html: true, linkify: false, breaks: false })
+
+// Tag markdown-it's table / code output with the legacy `md-table` / `md-code`
+// classes so the existing scoped styles keep matching without changes.
+md.renderer.rules.table_open = () => '<table class="md-table">\n'
+md.renderer.rules.code_block = (tokens, idx) =>
+  `<pre class="md-code"><code class="lang-">${md.utils.escapeHtml(tokens[idx].content)}</code></pre>\n`
+md.renderer.rules.fence = (tokens, idx) => {
+  const token = tokens[idx]
+  const lang = (token.info || '').trim().split(/\s+/)[0] || ''
+  return `<pre class="md-code"><code class="lang-${md.utils.escapeHtml(lang)}">${md.utils.escapeHtml(token.content)}</code></pre>\n`
+}
+
+// DOMPurify's default policy already strips on* handlers, <script>, and
+// javascript: URIs. `target` is not in the default attr allow-list, and the
+// default ALLOWED_ATTR set is not exported in v3, so ADD_ATTR is the way to
+// append it without replacing the defaults.
+const SANITIZE_CONFIG = { ADD_ATTR: ['target'] }
+
+// Registered once at module level: every surviving <a href="..."> is treated
+// as an external link and forced to a safe rel.
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A' && node.hasAttribute('href')) {
+    node.setAttribute('rel', 'noopener noreferrer')
+  }
+})
 
 const props = defineProps<{ content: string }>()
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-function escapeAttr(s: string): string {
-  return escapeHtml(s)
-}
-
-function inline(s: string): string {
-  return s
-    .replace(/`([^`]+)`/g, (_, code) => `<code>${escapeHtml(code)}</code>`)
-    .replace(/\*\*([^*]+)\*\*/g, (_, t) => `<strong>${escapeHtml(t)}</strong>`)
-    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, (_, p, t) => `${p}<em>${escapeHtml(t)}</em>`)
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, txt, url) => {
-      const safe = /^(https?:|\/)/i.test(url) ? url : '#'
-      return `<a href="${escapeAttr(safe)}" target="_blank" rel="noopener">${escapeHtml(txt)}</a>`
-    })
-}
-
-function renderTable(rows: string[]): string {
-  if (rows.length < 2) return rows.map((r) => `<p>${inline(escapeHtml(r))}</p>`).join('')
-  const head = rows[0].split('|').slice(1, -1).map((c) => c.trim())
-  // row[1] is the alignment separator; skip
-  const body = rows.slice(2).map((r) => {
-    const cells = r.split('|').slice(1, -1).map((c) => c.trim())
-    return `<tr>${cells.map((c) => `<td>${inline(escapeHtml(c))}</td>`).join('')}</tr>`
-  }).join('')
-  return `<table class="md-table">
-    <thead><tr>${head.map((c) => `<th>${inline(escapeHtml(c))}</th>`).join('')}</tr></thead>
-    <tbody>${body}</tbody>
-  </table>`
-}
-
-function renderCodeBlock(lang: string, body: string): string {
-  return `<pre class="md-code"><code class="lang-${escapeAttr(lang || '')}">${escapeHtml(body)}</code></pre>`
-}
-
-const rendered = computed(() => {
-  const lines = (props.content || '').replace(/\r\n?/g, '\n').split('\n')
-  const out: string[] = []
-  let i = 0
-  let inList = false
-  let inOrdered = false
-  let inTable: string[] | null = null
-  let paraBuf: string[] = []
-
-  const flushPara = () => {
-    if (paraBuf.length) {
-      out.push(`<p>${inline(escapeHtml(paraBuf.join(' ').trim()))}</p>`)
-      paraBuf = []
-    }
-  }
-  const closeLists = () => {
-    if (inList) { out.push('</ul>'); inList = false }
-    if (inOrdered) { out.push('</ol>'); inOrdered = false }
-  }
-  const flushTable = () => {
-    if (inTable) {
-      out.push(renderTable(inTable))
-      inTable = null
-    }
-  }
-
-  while (i < lines.length) {
-    const line = lines[i]
-    const trimmed = line.trim()
-
-    // fenced code block
-    if (trimmed.startsWith('```')) {
-      flushPara(); closeLists(); flushTable()
-      const lang = trimmed.slice(3).trim()
-      const body: string[] = []
-      i++
-      while (i < lines.length && !lines[i].trim().startsWith('```')) {
-        body.push(lines[i])
-        i++
-      }
-      i++
-      out.push(renderCodeBlock(lang, body.join('\n')))
-      continue
-    }
-
-    // table block (consecutive | lines)
-    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-      flushPara(); closeLists()
-      if (!inTable) inTable = []
-      inTable.push(trimmed)
-      i++
-      // peek: if next line is not a table row, flush
-      if (i >= lines.length || !(lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|'))) {
-        flushTable()
-      }
-      continue
-    }
-    flushTable()
-
-    // headings
-    const headingMatch = /^(#{1,6})\s+(.*)$/.exec(trimmed)
-    if (headingMatch) {
-      flushPara(); closeLists()
-      const level = headingMatch[1].length
-      const text = headingMatch[2]
-      out.push(`<h${level}>${inline(escapeHtml(text))}</h${level}>`)
-      i++
-      continue
-    }
-
-    // blockquote
-    if (trimmed.startsWith('> ')) {
-      flushPara(); closeLists()
-      const buf: string[] = [trimmed.slice(2)]
-      i++
-      while (i < lines.length && lines[i].trim().startsWith('> ')) {
-        buf.push(lines[i].trim().slice(2))
-        i++
-      }
-      out.push(`<blockquote>${inline(escapeHtml(buf.join(' ')))}</blockquote>`)
-      continue
-    }
-
-    // horizontal rule
-    if (/^(-{3,}|\*{3,}|_{3,})\s*$/.test(trimmed)) {
-      flushPara(); closeLists()
-      out.push('<hr/>')
-      i++
-      continue
-    }
-
-    // unordered list
-    if (/^[-*+]\s+/.test(trimmed)) {
-      flushPara()
-      if (!inList) { out.push('<ul>'); inList = true }
-      const item = trimmed.replace(/^[-*+]\s+/, '')
-      out.push(`<li>${inline(escapeHtml(item))}</li>`)
-      i++
-      continue
-    }
-    if (inList) { out.push('</ul>'); inList = false }
-
-    // ordered list
-    if (/^\d+\.\s+/.test(trimmed)) {
-      flushPara()
-      if (!inOrdered) { out.push('<ol>'); inOrdered = true }
-      const item = trimmed.replace(/^\d+\.\s+/, '')
-      out.push(`<li>${inline(escapeHtml(item))}</li>`)
-      i++
-      continue
-    }
-    if (inOrdered) { out.push('</ol>'); inOrdered = false }
-
-    // blank line: paragraph break
-    if (trimmed === '') {
-      flushPara()
-      i++
-      continue
-    }
-
-    // accumulating paragraph text
-    paraBuf.push(trimmed)
-    i++
-  }
-  flushPara(); closeLists(); flushTable()
-  return out.join('\n')
-})
+const rendered = computed(() => DOMPurify.sanitize(md.render(props.content ?? ''), SANITIZE_CONFIG))
 </script>
 
 <style scoped>

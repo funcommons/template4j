@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 脚本中的变量
+
+
+    脚本中四类变量：局部变量、注入对象、内置对象和模板变量，及优先级规则'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

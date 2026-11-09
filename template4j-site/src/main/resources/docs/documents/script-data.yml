@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 引用数据 @...
+
+
+    脚本中引用数据的三种方式：@xxx、@''xxx'' 和 @(jsonpath)'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

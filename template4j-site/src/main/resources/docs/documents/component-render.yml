@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 动态渲染 render
+
+
+    使用 @class:render 进行二次动态渲染，适用于延迟绑定场景'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

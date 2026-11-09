@@ -1,13 +1,15 @@
-package fun.commons.template4j.demo.service;
+package fun.commons.template4j.site.service;
 
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import fun.commons.template4j.core.RenderEngine;
-import fun.commons.template4j.demo.config.DemoProperties;
-import fun.commons.template4j.demo.dto.RenderRequest;
-import fun.commons.template4j.demo.dto.RenderResponse;
-import fun.commons.template4j.demo.exception.BizException;
-import jakarta.annotation.PreDestroy;
+import fun.commons.template4j.core.RenderException;
+import fun.commons.template4j.core.RenderOptions;
+import fun.commons.template4j.site.config.DemoProperties;
+import fun.commons.template4j.site.dto.RenderRequest;
+import fun.commons.template4j.site.dto.RenderResponse;
+import fun.commons.template4j.site.exception.BizException;
+import fun.commons.template4j.site.metrics.RenderMetrics;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
 
 @Slf4j
 @Service
@@ -24,22 +25,15 @@ public class TemplateService {
     private final RenderEngine renderEngine;
     private final DemoProperties demoProperties;
     private final YAMLMapper yamlMapper;
-    private final ExecutorService renderExecutor;
-    private final ThreadLocal<List<String>> traceHolder = new ThreadLocal<>();
+    private final RenderMetrics renderMetrics;
+    /** 最近一次成功渲染的 trace 行 (TraceEvent.format()), 供 TryController 的 with_trace 读取。 */
+    private volatile List<String> lastTrace;
 
-    public TemplateService(RenderEngine renderEngine, DemoProperties demoProperties) {
+    public TemplateService(RenderEngine renderEngine, DemoProperties demoProperties, RenderMetrics renderMetrics) {
         this.renderEngine = renderEngine;
         this.demoProperties = demoProperties;
+        this.renderMetrics = renderMetrics;
         this.yamlMapper = new YAMLMapper();
-        this.renderExecutor = new ThreadPoolExecutor(
-            2, 4, 60L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(100),
-            new ThreadPoolExecutor.CallerRunsPolicy());
-    }
-
-    @PreDestroy
-    void shutdown() {
-        renderExecutor.shutdownNow();
     }
 
     public RenderResponse render(RenderRequest request) {
@@ -75,8 +69,11 @@ public class TemplateService {
             // if the parser fell back to a raw string template (json with {@...} placeholders),
             // surface that fact to the client so it can render the output as a string.
             boolean asString = "string".equalsIgnoreCase(type) || (parsed instanceof String);
-            Object result = renderWithTimeout(parsed, data);
+            List<String> trace = new ArrayList<>();
+            Object result = renderWithTimeout(parsed, data, trace);
+            lastTrace = List.copyOf(trace);
             long timing = System.currentTimeMillis() - start;
+            renderMetrics.recordSuccess(type, timing);
             return new RenderResponse(result, asString ? "string" : type, timing);
         } catch (BizException e) {
             throw e;
@@ -107,23 +104,23 @@ public class TemplateService {
         }
     }
 
-    private Object renderWithTimeout(Object template, Map<String, Object> data) throws Exception {
-        Future<Object> future = renderExecutor.submit(() -> renderEngine.render(template, data));
+    private Object renderWithTimeout(Object template, Map<String, Object> data, List<String> trace) {
+        RenderOptions options = RenderOptions.builder()
+            .timeoutMs(demoProperties.getRenderTimeoutMs())
+            .traceConsumer(event -> trace.add(event.format()))
+            .build();
         try {
-            return future.get(demoProperties.getRenderTimeoutMs(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            future.cancel(true);
-            throw BizException.timeout("Render timed out after " + demoProperties.getRenderTimeoutMs() + "ms");
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof BizException) throw (BizException) cause;
-            if (cause instanceof Exception) throw (Exception) cause;
-            throw new RuntimeException(cause);
+            return renderEngine.render(template, data, options);
+        } catch (RenderException e) {
+            if (e.getMessage() != null && e.getMessage().contains("timed out")) {
+                throw BizException.timeout("Render timed out after " + demoProperties.getRenderTimeoutMs() + "ms");
+            }
+            throw e;
         }
     }
 
     public List<String> getTrace() {
-        List<String> trace = traceHolder.get();
-        return trace != null ? new ArrayList<>(trace) : Collections.emptyList();
+        List<String> trace = lastTrace;
+        return trace != null ? trace : Collections.emptyList();
     }
 }

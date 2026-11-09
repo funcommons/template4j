@@ -1,4 +1,4 @@
-package fun.commons.template4j.demo.config;
+package fun.commons.template4j.site.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 轮询 each
+
+
+    使用 @class:each 遍历数组或 Map，支持 keyName/itemName 和 merge/nonnull 选项'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"items":{"@class":"each","select":"{@list}","body":"{$item.name}"}}'
+    - name: data
+      value: '{"list": [{"name": "电影"}, {"name": "音乐"}]}'
+    result: 电影

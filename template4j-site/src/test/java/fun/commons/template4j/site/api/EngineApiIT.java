@@ -1,16 +1,16 @@
-package fun.commons.template4j.demo.api;
+package fun.commons.template4j.site.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import fun.commons.template4j.demo.DemoApplication;
+import fun.commons.template4j.site.SiteApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(classes = DemoApplication.class)
+@SpringBootTest(classes = SiteApplication.class)
 @AutoConfigureMockMvc
 class EngineApiIT {
 

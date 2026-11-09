@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# cast 数据类型转换
+
+
+    内置函数 cast(value, type) 将值转换为指定 Java 类型（String、Integer、Boolean 等）'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

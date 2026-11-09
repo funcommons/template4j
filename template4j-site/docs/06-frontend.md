@@ -143,7 +143,7 @@ frontend/
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ template4j-demo                                                   │
+│ template4j-site                                                   │
 │ 一站式学习 template4j-core：示例 / playground / 文档              │
 │                                                                  │
 │ [▶ 开始学习]  [🔧 在线试用]  [📚 文档]                            │
@@ -254,7 +254,7 @@ export const useTry = defineStore('try', {
 ```ts
 // locales/zh-CN.ts
 export default {
-  app: { title: 'template4j-demo' },
+  app: { title: 'template4j-site' },
   nav: { home: '首页', learn: '学习', try: '试用', docs: '文档' },
   home: { subtitle: '一站式学习 template4j-core：示例 / playground / 文档' },
   learn: { examples: '示例导航', description: '说明', template: '模板', data: '数据', expected: '预期渲染', openInTry: '在 playground 中打开' },

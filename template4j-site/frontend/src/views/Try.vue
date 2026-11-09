@@ -34,7 +34,7 @@
     </div>
     <div v-if="store.lastResult" class="result">
       <h4>{{ t('try.result') }} ({{ store.lastTiming }} ms)</h4>
-      <pre class="code-block">{{ JSON.stringify(store.lastResult, null, 2) }}</pre>
+      <pre class="code-block">{{ prettyResult(store.lastResult) }}</pre>
       <div v-if="store.trace.length > 0">
         <h4>{{ t('try.trace') }}</h4>
         <ul>
@@ -46,7 +46,7 @@
       <h4>{{ t('try.history') }}</h4>
       <div v-for="(h, i) in store.history.slice(0, 5)" :key="i" class="history-item" @click="restoreHistory(h)">
         <span>{{ new Date(h.ts).toLocaleTimeString() }}</span>
-        <span>{{ JSON.stringify(h.rendered).slice(0, 60) }}...</span>
+        <span>{{ summarize(h.rendered) }}</span>
       </div>
     </div>
   </div>
@@ -64,6 +64,18 @@ const store = useTryStore()
 const loading = ref(false)
 const dataError = ref('')
 
+/** rendered 可能已是 JSON 字符串 (后端序列化产物), 解析后再美化, 避免双重转义 */
+function prettyResult(r: any): string {
+  if (typeof r === 'string') {
+    try { return JSON.stringify(JSON.parse(r), null, 2) } catch { return r }
+  }
+  return JSON.stringify(r, null, 2)
+}
+function summarize(r: any): string {
+  const s = typeof r === 'string' ? r : JSON.stringify(r)
+  return s.slice(0, 60) + '...'
+}
+
 async function doRender() {
   loading.value = true
   try {
@@ -72,7 +84,7 @@ async function doRender() {
     try {
       dataObj = JSON.parse(store.data || '{}')
     } catch {
-      dataError.value = 'Invalid JSON in data field'
+      dataError.value = t('try.invalidJsonData')
       loading.value = false
       return
     }
@@ -85,7 +97,7 @@ async function doRender() {
     })
     store.setResult(result.rendered, result.timing_ms, result.trace)
   } catch (e: any) {
-    store.setResult({ error: e.message || 'Render failed' }, 0, [])
+    store.setResult({ error: e.message || t('try.renderFailed') }, 0, [])
   } finally {
     loading.value = false
   }

@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 字段后缀 ...#
+
+
+    使用 # 后缀让 key 或字符串原样返回不解析(锚定 hash 语法)'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

@@ -166,7 +166,7 @@
                     <span v-else class="output-placeholder" :data-testid="`learn-placeholder-${idx}`">{{ t('learn.runHint') || '点击「运行」查看渲染结果' }}</span>
                   </div>
                   <details v-if="section.content.code" class="code-attached">
-                    <summary>Java 调用代码</summary>
+                    <summary>{{ t('learn.javaCallCode') }}</summary>
                     <pre class="code-block code-java"><code>{{ section.content.code.trim() }}</code></pre>
                   </details>
                 </div>
@@ -323,7 +323,7 @@ async function runSection(idx: number) {
     try {
       dataObj = JSON.parse(data || '{}')
     } catch {
-      errors[idx] = 'data 字段不是合法 JSON'
+      errors[idx] = t('learn.invalidJsonData')
       delete results[idx]
       running[idx] = false
       return
@@ -341,7 +341,7 @@ async function runSection(idx: number) {
       results[idx] = JSON.stringify(r.rendered, null, 2)
     }
   } catch (e: any) {
-    errors[idx] = e?.response?.data?.message || e?.message || '渲染失败'
+    errors[idx] = e?.response?.data?.message || e?.message || t('learn.renderFailed')
     delete results[idx]
   } finally {
     running[idx] = false
@@ -392,7 +392,7 @@ async function copyText(text: string, key = '') {
   try {
     await navigator.clipboard.writeText(text)
   } catch {
-    ElMessage.warning('复制失败,请手动选择')
+    ElMessage.warning(t('learn.copyFailed'))
   }
 }
 </script>

@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 条件判断 if
+
+
+    使用 @class:if 进行条件渲染，支持 is/true/false 谓词和多条件判断'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"result":{"@class":"if","select":"{@ok}","is":"true","then":"成功","else":"失败"}}'
+    - name: data
+      value: '{"ok": false}'
+    result: 失败

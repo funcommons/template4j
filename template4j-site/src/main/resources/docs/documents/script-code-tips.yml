@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 常用代码参考
+
+
+    脚本中常用的工具类方法（StringUtils、ArrayUtils、BooleanUtils 等）'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

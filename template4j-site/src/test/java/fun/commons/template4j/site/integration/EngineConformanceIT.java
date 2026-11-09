@@ -1,16 +1,16 @@
-package fun.commons.template4j.demo.integration;
+package fun.commons.template4j.site.integration;
 
 import fun.commons.template4j.core.RenderEngine;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import fun.commons.template4j.demo.DemoApplication;
+import fun.commons.template4j.site.SiteApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = DemoApplication.class)
+@SpringBootTest(classes = SiteApplication.class)
 class EngineConformanceIT {
 
     @Autowired

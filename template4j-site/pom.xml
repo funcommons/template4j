@@ -7,10 +7,10 @@
     <parent>
         <groupId>fun.commons</groupId>
         <artifactId>template4j-parent</artifactId>
-        <version>0.5.0-SNAPSHOT</version>
+        <version>0.5.0</version>
     </parent>
 
-    <artifactId>template4j-demo</artifactId>
+    <artifactId>template4j-site</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -53,6 +53,12 @@
         <dependency>
             <groupId>fun.commons</groupId>
             <artifactId>template4j-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.10.1</version>
         </dependency>
 
         <dependency>
@@ -101,6 +107,11 @@
                         <include>**/*IT.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <systemPropertyVariables>
+                        <!-- IT tests spin up MockWebServer on 127.0.0.1; whitelist
+                             loopback so RestRenderer's SSRF guard does not reject them. -->
+                        <template4j.rest.allowed-hosts>127.0.0.1,localhost,0.0.0.0</template4j.rest.allowed-hosts>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -136,11 +147,11 @@
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
-                                            <minimum>0.80</minimum>
+                                            <minimum>0.92</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
-                                            <minimum>0.70</minimum>
+                                            <minimum>0.87</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

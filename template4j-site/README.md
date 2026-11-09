@@ -1,4 +1,4 @@
-# template4j-demo
+# template4j-site
 
 > template4j-core 的学习 / 集成测试 / 在线试用 demo 应用。
 
@@ -6,7 +6,7 @@
 
 template4j-core 是一个 JSON / YAML 模板引擎（见 `template4j-core/CLAUDE.md`）。模板本身是 JSON 形态的对象，混合字面量与表达式（`{@...}` / `{$...}` / `{=…}` / `{%…%}`），并通过 `@class` 调用组件（`if` / `each` / `switch` / `invoke` / `render` / `const` / `rest`）。
 
-template4j-demo 围绕该引擎搭建一个可运行的全栈应用，达成三大目标：
+template4j-site 围绕该引擎搭建一个可运行的全栈应用，达成三大目标：
 
 | 目标 | 实现路径 |
 |------|---------|
@@ -17,7 +17,7 @@ template4j-demo 围绕该引擎搭建一个可运行的全栈应用，达成三�
 ## 2. 目录结构
 
 ```
-template4j-demo/
+template4j-site/
 ├── README.md                         # 本文件
 ├── pom.xml                           # Maven 配置
 ├── docs/                             # 设计文档
@@ -29,8 +29,8 @@ template4j-demo/
 │   └── 06-frontend.md                # 前端结构
 ├── src/
 │   ├── main/
-│   │   ├── java/fun/commons/template4j/demo/
-│   │   │   ├── DemoApplication.java
+│   │   ├── java/fun/commons/template4j/site/
+│   │   │   ├── SiteApplication.java
 │   │   │   ├── common/               # ApiResponse / ErrorCode / BizException / ApiError
 │   │   │   ├── config/               # JacksonConfig / TraceIdFilter
 │   │   │   ├── controller/           # RenderController / LearnController / TryController
@@ -49,7 +49,7 @@ template4j-demo/
 │   │           ├── 08-yaml-config.yaml
 │   │           └── index.json
 │   └── test/
-│       └── java/fun/commons/template4j/demo/
+│       └── java/fun/commons/template4j/site/
 │           ├── RenderApiIT.java
 │           ├── LearnApiIT.java
 │           ├── TryApiIT.java
@@ -73,14 +73,14 @@ template4j-demo/
 ### 后端独立运行
 
 ```bash
-mvn -pl template4j-demo spring-boot:run
+mvn -pl template4j-site spring-boot:run
 # 默认端口 8088，访问 http://localhost:8088/api/examples 列出全部示例
 ```
 
 ### 前端独立运行（开发热更新）
 
 ```bash
-cd template4j-demo/frontend
+cd template4j-site/frontend
 npm install
 npm run dev    # 默认端口 5173，自动代理 /api → http://localhost:8088
 ```
@@ -88,10 +88,10 @@ npm run dev    # 默认端口 5173，自动代理 /api → http://localhost:8088
 ### 一体化打包
 
 ```bash
-cd template4j-demo/frontend && npm run build      # 产物 → frontend/dist
+cd template4j-site/frontend && npm run build      # 产物 → frontend/dist
 cd .. && cp -r frontend/dist src/main/resources/static
-mvn -pl template4j-demo package                   # 产物 → target/template4j-demo.jar
-java -jar target/template4j-demo.jar              # 访问 http://localhost:8088/
+mvn -pl template4j-site package                   # 产物 → target/template4j-site.jar
+java -jar target/template4j-site.jar              # 访问 http://localhost:8088/
 ```
 
 ## 4. 三大目标对应文档
@@ -115,19 +115,6 @@ java -jar target/template4j-demo.jar              # 访问 http://localhost:8088
 | 国际化 | vue-i18n | ^9.14 |
 | 路由 | vue-router | ^4.5 |
 | 状态 | Pinia | ^2.3 |
-
-## 6. 与 template4j-web 的关系
-
-| 维度 | template4j-web | template4j-demo |
-|------|----------------|-----------------|
-| 定位 | 生产文档服务器 | 学习/试用 demo |
-| 引擎使用 | 直接 new JsonRenderer() | 通过 TemplateService 封装 |
-| API 风格 | 模板文件路由（/docs/*.jt 等） | REST 信封 + playground |
-| 前端 | 无独立前端 | Vue 3 SPA |
-| 测试 | JaCoCo 100% 覆盖 | 集成测试为主 |
-| 配置 | `template4j.web.*` | `template4j.demo.*` |
-
-demo 复用 web 中的 `.gsp` / `.jt` / `.yt` 渲染逻辑，但用 REST API 暴露而非 URL 路由。
 
 ## 7. 进一步阅读
 

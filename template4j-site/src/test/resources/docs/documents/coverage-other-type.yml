@@ -1,0 +1,4 @@
+- type: custom-type
+  content: "raw content"
+- type: markdown
+  content: "hello markdown"

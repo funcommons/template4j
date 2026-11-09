@@ -1,0 +1,5 @@
+- type: json-renderer
+  content:
+    doc: true
+    variables: []
+    result: '{"r":1}'

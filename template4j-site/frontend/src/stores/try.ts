@@ -17,6 +17,8 @@ export const useTryStore = defineStore('try', () => {
     lastResult.value = result
     lastTiming.value = timing
     trace.value = t
+    // 清空 (result == null) 不是一次渲染, 不写入历史, 避免历史首条变成 null 条目
+    if (result == null) return
     history.value.unshift({ ts: Date.now(), template: template.value, data: data.value, rendered: result })
     if (history.value.length > 20) history.value.pop()
   }

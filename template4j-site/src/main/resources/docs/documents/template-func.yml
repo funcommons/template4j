@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 方法 $...()
+
+
+    使用 $name() 定义可复用方法，支持 _args 参数和默认值'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

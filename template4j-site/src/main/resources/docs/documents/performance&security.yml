@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 性能与安全
+
+
+    模板性能特征（脚本编译缓存、预渲染建议）和安全注意事项（只使用可信模板来源）'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

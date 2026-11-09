@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# JSON 键顺序
+
+
+    JSONObject 键顺序保证，影响 &include 和 * 节点渲染结果的一致性'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

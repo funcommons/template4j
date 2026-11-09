@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# render 渲染模板
+
+
+    内置函数 render(template) 在当前数据/变量上下文中渲染模板'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

@@ -1,9 +1,9 @@
-package fun.commons.template4j.demo.integration;
+package fun.commons.template4j.site.integration;
 
 import com.alibaba.fastjson2.JSON;
 import fun.commons.template4j.core.RenderEngine;
-import fun.commons.template4j.demo.DemoApplication;
-import fun.commons.template4j.demo.service.ExampleService;
+import fun.commons.template4j.site.SiteApplication;
+import fun.commons.template4j.site.service.ExampleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,9 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = DemoApplication.class)
+/**
+ * ExamplesRenderingIT: 加载 docs/documents/*.yml, 渲染模板, 断言关键内容。
+ * 0.5.1: yml 资源已重建 (script: scripts/gen_examples.py 风格, 内容最小化)。
+ */
+@SpringBootTest(classes = SiteApplication.class)
 class ExamplesRenderingIT {
 
     @Autowired

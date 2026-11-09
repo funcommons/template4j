@@ -1,4 +1,4 @@
-package fun.commons.template4j.demo.common;
+package fun.commons.template4j.site.common;
 
 public class ErrorCode {
     private ErrorCode() {}

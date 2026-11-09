@@ -1,4 +1,4 @@
-package fun.commons.template4j.demo.config;
+package fun.commons.template4j.site.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -16,7 +16,7 @@
 
 每阶段交付后必须满足：
 
-- `mvn -pl template4j-demo verify` 通过
+- `mvn -pl template4j-site verify` 通过
 - 覆盖率 LINE ≥ 90%（与 mc-java-spec 一致）
 - 关键 IT 全绿
 
@@ -26,8 +26,8 @@
 
 | # | 任务 | 工时 |
 |---|------|------|
-| P0-1 | 父 pom 注册 module + template4j-demo/pom.xml | 5 min |
-| P0-2 | DemoApplication + DemoProperties | 10 min |
+| P0-1 | 父 pom 注册 module + template4j-site/pom.xml | 5 min |
+| P0-2 | SiteApplication + DemoProperties | 10 min |
 | P0-3 | common/{ApiResponse, ApiError, BizException, ErrorCode} | 15 min |
 | P0-4 | config/{JacksonConfig, TraceIdFilter} | 15 min |
 | P0-5 | exception/GlobalExceptionHandler | 10 min |
@@ -39,7 +39,7 @@
 ### 验收
 
 ```bash
-mvn -pl template4j-demo spring-boot:run
+mvn -pl template4j-site spring-boot:run
 curl http://localhost:8088/api/engine
 # 应返回 200 + JSON 信封
 ```
@@ -103,7 +103,7 @@ curl http://localhost:8088/api/learn/01-syntax-data
 
 | # | 任务 | 工时 |
 |---|------|------|
-| P3-1 | 复制 mc-webui-spec/example/ → template4j-demo/frontend/ | 5 min |
+| P3-1 | 复制 mc-webui-spec/example/ → template4j-site/frontend/ | 5 min |
 | P3-2 | 改 package.json（项目名 / proxy 配置） | 5 min |
 | P3-3 | 改 nav-config.ts（导航：Home/Learn/Try/Docs） | 10 min |
 | P3-4 | 改 brands.ts（保留 mchuan，注释其他） | 5 min |
@@ -152,11 +152,11 @@ curl http://localhost:8088/api/learn/01-syntax-data
 | P5-3 | README 完善（运行方式 + 截图） | 20 min |
 | P5-4 | CHANGELOG.md | 10 min |
 | P5-5 | 最终回归：mvn verify + cd frontend && npm run build | 10 min |
-| P5-6 | 一键启动验证：java -jar target/template4j-demo.jar | 10 min |
+| P5-6 | 一键启动验证：java -jar target/template4j-site.jar | 10 min |
 
 ### 验收
 
-- `java -jar template4j-demo.jar` 启动 → 浏览器 http://localhost:8088 → 全功能可用
+- `java -jar template4j-site.jar` 启动 → 浏览器 http://localhost:8088 → 全功能可用
 - README 描述的 3 种运行方式（mvn / npm dev / jar）全部可用
 
 ## 8. 风险与缓解
@@ -181,7 +181,7 @@ controller/    4 (EngineController, RenderController, LearnController, TryContro
 service/       2 (TemplateService, ExampleService)
 exception/     1 (GlobalExceptionHandler)
 dto/           6 (RenderRequest, RenderResponse, ExampleMeta, ExampleDetail, TryRequest, TryResponse)
-DemoApplication.java
+SiteApplication.java
 ```
 
 ### 9.2 资源文件（11 个）
@@ -211,7 +211,7 @@ examples/01..08 (模板 + 数据 + expected)
 
 ### 后端
 
-- [ ] `mvn -pl template4j-demo verify` 通过
+- [ ] `mvn -pl template4j-site verify` 通过
 - [ ] LINE 覆盖率 ≥ 90%
 - [ ] 8 个示例渲染 IT 全绿
 - [ ] /api/render /api/learn /api/try /api/engine 四个端点全部返回正确信封
@@ -229,7 +229,7 @@ examples/01..08 (模板 + 数据 + expected)
 
 ### 一体化
 
-- [ ] `java -jar target/template4j-demo.jar` 单独启动可访问全部功能
+- [ ] `java -jar target/template4j-site.jar` 单独启动可访问全部功能
 - [ ] README 三种运行方式均验证
 - [ ] docs/ 6 篇文档全部成稿
 

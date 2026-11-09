@@ -1,0 +1,9 @@
+- type: json-renderer
+  content:
+    doc: false
+    variables:
+    - name: template
+      value: '{"x":"y"}'
+    - name: data
+      value: '{}'
+    result: ''

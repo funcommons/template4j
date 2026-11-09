@@ -1,6 +1,6 @@
-package fun.commons.template4j.demo.exception;
+package fun.commons.template4j.site.exception;
 
-import fun.commons.template4j.demo.common.ErrorCode;
+import fun.commons.template4j.site.common.ErrorCode;
 import lombok.Getter;
 
 @Getter

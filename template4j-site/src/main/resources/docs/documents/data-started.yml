@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 数据表达式 {@...}
+
+
+    使用 {@path} 表达式引用数据字段，支持 JSONPath 语法'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"name":"{@user.name}"}'
+    - name: data
+      value: '{"user": {"name": "小红"}}'
+    result: 小红

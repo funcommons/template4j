@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 渲染后事件 $return{}
+
+
+    在子节点渲染后执行脚本，可操作 _result 对象进行后处理（如删除空字段）'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

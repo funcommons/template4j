@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 方法调用 invoke
+
+
+    使用 @class:invoke 调用 Java 方法或对象，支持 @invoke|method 简写'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

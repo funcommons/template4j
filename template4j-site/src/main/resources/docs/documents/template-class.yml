@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 渲染组件 @class
+
+
+    使用 @class 机制调用渲染组件，支持嵌套和 @{class}|method 简写'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

@@ -28,7 +28,7 @@
 ## 2. 测试类清单
 
 ```
-src/test/java/fun/commons/template4j/demo/
+src/test/java/fun/commons/template4j/site/
 ├── service/
 │   ├── TemplateServiceUT.java          # 单测
 │   └── ExampleServiceUT.java
@@ -222,7 +222,7 @@ class ApplicationStartupIT {
 ```yaml
 # .github/workflows/demo-ci.yml
 name: demo-ci
-on: { push: { paths: ['template4j-demo/**'] } }
+on: { push: { paths: ['template4j-site/**'] } }
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -230,10 +230,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { java-version: 17, distribution: temurin }
-      - run: mvn -pl template4j-demo -am verify
+      - run: mvn -pl template4j-site -am verify
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: cd template4j-demo/frontend && npm ci && npm run build
+      - run: cd template4j-site/frontend && npm ci && npm run build
 ```
 
 ## 8. 性能与稳定性

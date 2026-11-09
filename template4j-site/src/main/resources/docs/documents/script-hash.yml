@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 转义 <&...&>
+
+
+    使用 <&...&> 包裹原始内容，对模板表达式进行转义'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

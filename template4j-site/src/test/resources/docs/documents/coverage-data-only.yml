@@ -1,0 +1,6 @@
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: data
+      value: '{"x":42}'

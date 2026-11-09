@@ -1,10 +1,10 @@
-package fun.commons.template4j.demo.controller;
+package fun.commons.template4j.site.controller;
 
-import fun.commons.template4j.demo.common.ApiResponse;
-import fun.commons.template4j.demo.config.TraceIdFilter;
-import fun.commons.template4j.demo.dto.ExampleDetail;
-import fun.commons.template4j.demo.dto.ExampleMeta;
-import fun.commons.template4j.demo.service.ExampleService;
+import fun.commons.template4j.site.common.ApiResponse;
+import fun.commons.template4j.site.config.TraceIdFilter;
+import fun.commons.template4j.site.dto.ExampleDetail;
+import fun.commons.template4j.site.dto.ExampleMeta;
+import fun.commons.template4j.site.service.ExampleService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -1,0 +1,14 @@
+- type: markdown
+  content: '# 脚本声明 ...%
+
+
+    使用 % 后缀注明字段值为脚本，等价于 "...": "{%...%}" 的简写'
+- type: json-renderer
+  content:
+    doc: true
+    variables:
+    - name: template
+      value: '{"hello":"{@name}"}'
+    - name: data
+      value: '{"name": "world"}'
+    result: ''

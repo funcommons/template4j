@@ -1,8 +1,8 @@
-package fun.commons.template4j.demo.smoke;
+package fun.commons.template4j.site.smoke;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import fun.commons.template4j.demo.DemoApplication;
+import fun.commons.template4j.site.SiteApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = DemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = SiteApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationStartupIT {
 
     @LocalServerPort
