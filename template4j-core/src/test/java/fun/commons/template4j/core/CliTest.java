@@ -712,4 +712,67 @@ public class CliTest {
                 java.net.http.HttpResponse.BodyHandlers.ofString());
         Assertions.assertEquals(404, resp.statusCode());
     }
+
+    // ---- 选项缺值防护 (flag 收尾 → missing value + usage, exit 1) ----
+
+    @Test
+    public void renderMissingDataValueReturns1() throws Exception {
+        // --data 是最后一个参数 → 缺值, 输出 missing value + render usage, exit 1
+        Path tpl = Files.writeString(tmp.resolve("t.jt"), "{}");
+        String err = captureErr(() -> {
+            int code = Cli.run(new String[]{"render", tpl.toString(), "--data"});
+            Assertions.assertEquals(1, code);
+        });
+        Assertions.assertTrue(err.contains("missing value for --data"));
+        Assertions.assertTrue(err.contains("usage: template4j render"));
+    }
+
+    @Test
+    public void renderMissingDataFileValueReturns1() throws Exception {
+        // --data-file 是最后一个参数 → 缺值
+        Path tpl = Files.writeString(tmp.resolve("t.jt"), "{}");
+        String err = captureErr(() -> {
+            int code = Cli.run(new String[]{"render", tpl.toString(), "--data-file"});
+            Assertions.assertEquals(1, code);
+        });
+        Assertions.assertTrue(err.contains("missing value for --data-file"));
+        Assertions.assertTrue(err.contains("usage: template4j render"));
+    }
+
+    @Test
+    public void watchMissingDirValueReturns1() throws Exception {
+        // --dir / -d 是最后一个参数 → 缺值, 输出 missing value + watch usage, exit 1
+        for (String flag : new String[]{"--dir", "-d"}) {
+            String err = captureErr(() -> {
+                int code = Cli.run(new String[]{"watch", flag});
+                Assertions.assertEquals(1, code);
+            });
+            Assertions.assertTrue(err.contains("missing value for " + flag));
+            Assertions.assertTrue(err.contains("usage: template4j watch"));
+        }
+    }
+
+    @Test
+    public void watchMissingPortValueReturns1() throws Exception {
+        // --port / -p 是最后一个参数 → 缺值
+        for (String flag : new String[]{"--port", "-p"}) {
+            String err = captureErr(() -> {
+                int code = Cli.run(new String[]{"watch", flag});
+                Assertions.assertEquals(1, code);
+            });
+            Assertions.assertTrue(err.contains("missing value for " + flag));
+            Assertions.assertTrue(err.contains("usage: template4j watch"));
+        }
+    }
+
+    @Test
+    public void watchMissingDataValueReturns1() throws Exception {
+        // --data 是最后一个参数 → 缺值
+        String err = captureErr(() -> {
+            int code = Cli.run(new String[]{"watch", "--data"});
+            Assertions.assertEquals(1, code);
+        });
+        Assertions.assertTrue(err.contains("missing value for --data"));
+        Assertions.assertTrue(err.contains("usage: template4j watch"));
+    }
 }

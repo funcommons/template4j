@@ -81,9 +81,20 @@ public class Cli {
             String a = args[i];
             switch (a) {
                 case "--data":
+                    if (i + 1 >= args.length) {
+                        // 选项缺值 (已是最后一个参数): 提示用法而不是越界崩溃
+                        System.err.println("missing value for " + a);
+                        printRenderUsage();
+                        return 1;
+                    }
                     dataJson = args[++i];
                     break;
                 case "--data-file":
+                    if (i + 1 >= args.length) {
+                        System.err.println("missing value for " + a);
+                        printRenderUsage();
+                        return 1;
+                    }
                     dataFile = args[++i];
                     break;
                 case "--yaml":
@@ -210,10 +221,26 @@ public class Cli {
         for (int i = 1; i < args.length; i++) {
             String a = args[i];
             if ("--dir".equals(a) || "-d".equals(a)) {
+                if (i + 1 >= args.length) {
+                    // 选项缺值 (已是最后一个参数): 提示用法而不是越界崩溃
+                    System.err.println("missing value for " + a);
+                    printWatchUsage();
+                    return 1;
+                }
                 dir = args[++i];
             } else if ("--port".equals(a) || "-p".equals(a)) {
+                if (i + 1 >= args.length) {
+                    System.err.println("missing value for " + a);
+                    printWatchUsage();
+                    return 1;
+                }
                 port = Integer.parseInt(args[++i]);
             } else if ("--data".equals(a)) {
+                if (i + 1 >= args.length) {
+                    System.err.println("missing value for " + a);
+                    printWatchUsage();
+                    return 1;
+                }
                 dataJson = args[++i];
             } else {
                 throw new IllegalArgumentException("unknown arg: " + a);
@@ -342,5 +369,16 @@ public class Cli {
                   version   print version
                   help      this message
                 """);
+    }
+
+    /** render 子命令 usage: 选项缺值时输出到 stderr。 */
+    private static void printRenderUsage() {
+        System.err.println("usage: template4j render <template-file> --data '<json>'");
+        System.err.println("   or: template4j render <template-file> --data-file <data-file> [--yaml] [--pretty]");
+    }
+
+    /** watch 子命令 usage: 选项缺值时输出到 stderr。 */
+    private static void printWatchUsage() {
+        System.err.println("usage: template4j watch [--dir <path>] [--port <port>] [--data '<json>']");
     }
 }
