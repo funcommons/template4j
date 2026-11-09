@@ -58,7 +58,7 @@ Five placeholder forms in strings, decided by delimiter:
 
 Groovy scripts run inside `RenderBindings` (extends `SimpleBindings`) which exposes `data`, `vars`, `render`, `load`, `cast`, `fne`, plus any beans registered via `engine.withBean(name, bean)` and any classes added via `engine.withImport(fqn)`. `@` inside Groovy is rewritten to `data.` by `ScriptUtil.codeReplaceAt` before evaluation (with quoted-string and comment regions preserved).
 
-The default Groovy imports (`GroovyImports`) cover `java.*`, `com.alibaba.fastjson2.*`, and `org.apache.commons.lang3.*` — so `JSONObject`, `StringUtils`, etc. are usable without an explicit import.
+The default Groovy imports (`GroovyImports`) cover `java.*`, `com.alibaba.fastjson2.*`, and `org.apache.commons.lang3.*` — so `JSONObject`, `StringUtils`, etc. are usable without an explicit import. In sandbox mode the engine emits a converged import set (`GroovyImports.toSandboxCode()`): the default `java.io.*` / `java.net.*` entries are dropped (user-explicit `withImport` entries are always kept), so sandboxed scripts are no longer implicitly promised packages the whitelist forbids. Note Groovy's own built-in default imports still make those class names resolvable — the hard enforcement stays in the runtime whitelist.
 
 ### `SelfObject` (render context)
 

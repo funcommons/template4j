@@ -32,6 +32,11 @@ import java.util.Map;
  * 产物，key / 属性（{@code template4j.scriptCache.enabled} / {@code .maxEntries}）/ 构造时机
  * 与默认路径完全一致。SandboxTransformer 是编译期重写，缓存命中仍每次走
  * {@link GroovySandbox#eval(Script, javax.script.Bindings)} 的运行期拦截器，安全语义不变。
+ *
+ * <p>沙箱分支的编译前缀改用 {@link GroovyImports#toSandboxCode()}（默认导入收敛：不再隐式
+ * 携带 java.io / java.net，用户显式 import 照常保留，强制拦截仍由运行期白名单承担）；
+ * 非沙箱分支用 {@link GroovyImports#toCode()} 不变。两条路径共用
+ * {@code importsVersion + script} 的 key 规则，addImport 照常递增使旧条目自然失效。
  */
 final class ScriptEnvironment {
 
@@ -86,14 +91,15 @@ final class ScriptEnvironment {
         GroovySandbox sandbox = this.sandbox;
         if (sandbox != null) {
             if (!scriptCacheEnabled) {
-                return sandbox.eval(imports.toCode() + script, buildBindings(self));
+                return sandbox.eval(imports.toSandboxCode() + script, buildBindings(self));
             }
             String key = importsVersion + "\0" + script;
             Script compiled = sandboxScriptCache.getIfPresent(key);
             if (compiled == null) {
                 // miss 即编译并放入缓存（先于执行）: SandboxTransformer 重写在编译期,
-                // 违规脚本的编译产物同样入缓存, 运行期拦截交给 eval 内每次注册的白名单拦截器
-                compiled = sandbox.compile(imports.toCode() + script);
+                // 违规脚本的编译产物同样入缓存, 运行期拦截交给 eval 内每次注册的白名单拦截器;
+                // 前缀用收敛版 toSandboxCode() — 默认集不再隐式承诺 java.io / java.net
+                compiled = sandbox.compile(imports.toSandboxCode() + script);
                 sandboxScriptCache.put(key, compiled);
             }
             return sandbox.eval(compiled, buildBindings(self));
