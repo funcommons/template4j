@@ -18,6 +18,14 @@ template4j:
       enabled: true
       capacity: 10
       refill-minutes: 1
+      # 是否信任反向代理: true 且 remoteAddr 命中 trusted-proxies 时才取 X-Forwarded-For 首值作客户端标识;
+      # 默认 false (一律按 remoteAddr 计数, 防止伪造 XFF 绕过限流)
+      trust-proxy: false
+      # trust-proxy=true 时的可信代理 remoteAddr 列表 (逗号分隔, 支持精确 IP 与 IPv4 CIDR, 如 10.0.0.0/8);
+      # 留空表示没有可信代理, XFF 一律忽略
+      trusted-proxies: ""
+      # 客户端桶表最大条目数 (Caffeine LRU 有界淘汰), 防止海量 clientKey 喷射造成内存 DoS
+      max-buckets: 100000
 
 logging:
   level:

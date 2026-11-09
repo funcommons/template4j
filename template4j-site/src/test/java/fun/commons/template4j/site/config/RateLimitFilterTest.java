@@ -17,9 +17,11 @@ import java.io.IOException;
  * <p>实现契约 (业务代码需满足):
  * <ul>
  *   <li>公开构造器: {@code RateLimitFilter(boolean enabled, int capacity, int refillMinutes)};
- *       生产路径经 @Value 绑定 template4j.demo.rate-limit.{enabled,capacity,refill-minutes}, 默认 true/10/1</li>
+ *       生产路径经 @Value 绑定 template4j.demo.rate-limit.{enabled,capacity,refill-minutes}, 默认 true/10/1;
+ *       扩展 6 参构造器 (trustProxy/trustedProxies/maxBuckets) 见 RateLimitFilterTrustProxyTest</li>
  *   <li>只对 POST/PUT/PATCH/DELETE 且 /api/* 路径限流, 其余放行</li>
- *   <li>按 X-Forwarded-For 首值 (无则 remoteAddr) 独立计数</li>
+ *   <li>按客户端标识独立计数: 默认 (trustProxy=false) 一律取 remoteAddr, X-Forwarded-For 完全忽略
+ *       (S1 修复语义; 仅当 trustProxy=true 且 remoteAddr 为可信代理时才采信 XFF 首值)</li>
  *   <li>超限: 429 + Retry-After (秒 >= 1) + JSON 响应体, 且 chain 不再执行</li>
  * </ul>
  */
@@ -118,16 +120,25 @@ class RateLimitFilterTest {
     }
 
     @Test
-    void xForwardedForFirstValueTakesPrecedence() throws Exception {
-        Filter filter = new RateLimitFilter(true, 1, 1);
+    void xffIgnoredByDefaultTakesRemoteAddr() throws Exception {
+        // S1 修复前旧断言为 XFF 优先 (xForwardedForFirstValueTakesPrecedence: 相同 XFF 跨不同 remoteAddr 同桶);
+        // 修复后语义反转, 直连场景 (3 参兼容构造器, trustProxy=false) 下 XFF 完全忽略, 只按 remoteAddr 计数;
+        // 信任语义 (trustProxy=true / trusted-proxies / CIDR) 见 RateLimitFilterTrustProxyTest。
+        RateLimitFilter filter = new RateLimitFilter(true, 1, 1);
         Assertions.assertTrue(
                 send(filter, "POST", "/api/render", "192.168.0.1", "203.0.113.7, 10.0.0.1").passedChain());
-        // remoteAddr 换了, 但 XFF 首值相同 -> 仍按 203.0.113.7 计数, 应被拦截
-        Attempt blocked = send(filter, "POST", "/api/render", "10.9.9.9", "203.0.113.7");
-        Assertions.assertEquals(429, blocked.status(), "XFF 首值应优先于 remoteAddr");
+        // remoteAddr 换了, 即使 XFF 首值相同 -> 也不共享 203.0.113.7 的桶, 应独立放行 (旧断言此处期望 429, 已反转)
+        Assertions.assertTrue(send(filter, "POST", "/api/render", "10.9.9.9", "203.0.113.7").passedChain(),
+                "trustProxy=false 时相同 XFF 不应共享桶, 各 remoteAddr 独立计数");
+        // 同一 remoteAddr 轮换 XFF -> 仍命中同一个桶, 不能借 XFF 逃逸限流
+        Attempt blocked = send(filter, "POST", "/api/render", "192.168.0.1", "8.8.8.8");
+        Assertions.assertEquals(429, blocked.status(), "XFF 轮换不能绕过 remoteAddr 桶");
         Assertions.assertFalse(blocked.passedChain());
-        // XFF 不同 -> 独立计数
-        Assertions.assertTrue(send(filter, "POST", "/api/render", "203.0.113.7", "8.8.8.8").passedChain());
+        // 不同 remoteAddr -> 独立计数
+        Assertions.assertTrue(send(filter, "POST", "/api/render", "203.0.113.7", null).passedChain(),
+                "不同 remoteAddr 应独立计数");
+        // XFF 值不产生任何桶: 桶数恰为 3 个不同 remoteAddr, 而非按 XFF 首值展开
+        Assertions.assertEquals(3, filter.bucketCount(), "XFF 不应产生桶, 桶数应等于不同 remoteAddr 数");
     }
 
     @Test

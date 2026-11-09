@@ -61,6 +61,13 @@
             <version>8.10.1</version>
         </dependency>
 
+        <!-- RateLimitFilter 有界桶表 (Caffeine LRU, 防客户端标识喷射内存 DoS); 与 core 传递依赖版本对齐 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
