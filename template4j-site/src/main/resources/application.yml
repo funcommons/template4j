@@ -1,0 +1,20 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: template4j-demo
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    serialization:
+      write-dates-as-timestamps: true
+
+template4j:
+  demo:
+    render-timeout-ms: 5000
+    max-template-size: 65536
+
+logging:
+  level:
+    root: INFO
+    fun.commons.template4j: DEBUG

@@ -1,0 +1,326 @@
+[
+  {
+    "id": "intro-home",
+    "title": "介绍",
+    "description": "template4j 概述：什么是template4j、为什么使用它、能做到什么程度、优缺点及使用场景",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/home.yml",
+    "category": "介绍"
+  },
+  {
+    "id": "quick-start",
+    "title": "快速开始",
+    "description": "环境要求(Java 17+, Spring Boot 3.x)、Maven 依赖配置及第一个渲染示例",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/quick-start.yml",
+    "category": "快速开始"
+  },
+  {
+    "id": "text-data",
+    "title": "数据表达式 {@...}",
+    "description": "使用 {@path} 表达式引用数据字段，支持 JSONPath 语法",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/data-started.yml",
+    "category": "文本模板"
+  },
+  {
+    "id": "text-vars",
+    "title": "变量 {$...}",
+    "description": "使用 $name 语法定义和引用变量，理解变量作用域规则",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/vars-started.yml",
+    "category": "文本模板"
+  },
+  {
+    "id": "text-expression",
+    "title": "行内表达式 {=...}",
+    "description": "使用 {=...} 行内表达式计算数据，支持 Java 语法",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/expression-started.yml",
+    "category": "文本模板"
+  },
+  {
+    "id": "text-escape",
+    "title": "转义 <&...&>",
+    "description": "使用 <&...&> 包裹原始内容，对模板表达式进行转义",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-hash.yml",
+    "category": "文本模板"
+  },
+  {
+    "id": "script-started",
+    "title": "脚本声明 {%...%}",
+    "description": "使用 {%...%} 编写多行 Groovy 脚本，支持 Java 语法、局部变量和 return",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-started.yml",
+    "category": "脚本模板"
+  },
+  {
+    "id": "script-data",
+    "title": "引用数据 @...",
+    "description": "脚本中引用数据的三种方式：@xxx、@'xxx' 和 @(jsonpath)",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-data.yml",
+    "category": "脚本模板"
+  },
+  {
+    "id": "script-vars",
+    "title": "脚本中的变量",
+    "description": "脚本中四类变量：局部变量、注入对象、内置对象和模板变量，及优先级规则",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-vars.yml",
+    "category": "脚本模板"
+  },
+  {
+    "id": "template-script",
+    "title": "脚本声明 ...%",
+    "description": "使用 % 后缀注明字段值为脚本，等价于 \"...\": \"{%...%}\" 的简写",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-script.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-const",
+    "title": "不渲染 ...&",
+    "description": "使用 & 后缀让字段值原样返回不渲染，也适用于 $...& 变量形式",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-const.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-vars",
+    "title": "变量 $...",
+    "description": "使用 $ 前缀定义模板变量，变量被引用而非直接输出",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-vars.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-func",
+    "title": "方法 $...()",
+    "description": "使用 $name() 定义可复用方法，支持 _args 参数和默认值",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-func.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-enter",
+    "title": "渲染前事件 $enter{}",
+    "description": "在子节点渲染前执行脚本，可操作 _template 对象进行模板预处理",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/template-enter.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-return",
+    "title": "渲染后事件 $return{}",
+    "description": "在子节点渲染后执行脚本，可操作 _result 对象进行后处理（如删除空字段）",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/template-return.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-data",
+    "title": "局部数据 @",
+    "description": "使用 @ 字段定义局部数据，作用域为当前节点及子节点，可覆盖上层数据",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-data.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-star",
+    "title": "合并子项 *",
+    "description": "使用 * 节点将其子字段合并到当前层级，遵循后覆盖前的优先级规则",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/template-star.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-comment",
+    "title": "注释 #...",
+    "description": "使用 # 前缀的字段作为注释，渲染时被忽略",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/template-comment.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-escape",
+    "title": "key 转义 <&...&>",
+    "description": "对特殊 key（如 # 开头）使用 <&...&> 包裹使其成为字面量",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-escape.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-class",
+    "title": "渲染组件 @class",
+    "description": "使用 @class 机制调用渲染组件，支持嵌套和 @{class}|method 简写",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/template-class.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-include",
+    "title": "嵌套模板 &include",
+    "description": "使用 &include 静态嵌套另一个模板文件，支持多层嵌套和节点覆盖",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/template-include.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "template-hash",
+    "title": "字段后缀 ...#",
+    "description": "使用 # 后缀让 key 或字符串原样返回不解析(锚定 hash 语法)",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/template-hash.yml",
+    "category": "对象模板"
+  },
+  {
+    "id": "component-if",
+    "title": "条件判断 if",
+    "description": "使用 @class:if 进行条件渲染，支持 is/true/false 谓词和多条件判断",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/component-if.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-each",
+    "title": "轮询 each",
+    "description": "使用 @class:each 遍历数组或 Map，支持 keyName/itemName 和 merge/nonnull 选项",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/component-each.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-switch",
+    "title": "条件分支 switch",
+    "description": "使用 @class:switch 进行多分支选择，支持 cases 和 default 分支",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/component-switch.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-render",
+    "title": "动态渲染 render",
+    "description": "使用 @class:render 进行二次动态渲染，适用于延迟绑定场景",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/component-render.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-const",
+    "title": "不渲染 const",
+    "description": "使用 @class:const 返回节点原样不渲染，支持 @const 简写",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/component-const.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-invoke",
+    "title": "方法调用 invoke",
+    "description": "使用 @class:invoke 调用 Java 方法或对象，支持 @invoke|method 简写",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/component-invoke.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "component-rest",
+    "title": "接口调用 rest",
+    "description": "使用 @class:rest 发起 HTTP 请求，支持 GET/POST/PUT/DELETE 和 success/error 处理",
+    "difficulty": 3,
+    "template_type": "json",
+    "source": "docs/documents/component-rest.yml",
+    "category": "模板组件"
+  },
+  {
+    "id": "builtin-fne",
+    "title": "fne 第一个非空值",
+    "description": "内置函数 fne() 返回第一个非空值，空字符串、空列表/Map、null 均视为空",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-fne.yml",
+    "category": "内置方法"
+  },
+  {
+    "id": "builtin-cast",
+    "title": "cast 数据类型转换",
+    "description": "内置函数 cast(value, type) 将值转换为指定 Java 类型（String、Integer、Boolean 等）",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-cast.yml",
+    "category": "内置方法"
+  },
+  {
+    "id": "builtin-render",
+    "title": "render 渲染模板",
+    "description": "内置函数 render(template) 在当前数据/变量上下文中渲染模板",
+    "difficulty": 2,
+    "template_type": "json",
+    "source": "docs/documents/script-render.yml",
+    "category": "内置方法"
+  },
+  {
+    "id": "feature-json-key-order",
+    "title": "JSON 键顺序",
+    "description": "JSONObject 键顺序保证，影响 &include 和 * 节点渲染结果的一致性",
+    "difficulty": 1,
+    "template_type": "json",
+    "source": "docs/documents/json-key-order.yml",
+    "category": "特性"
+  },
+  {
+    "id": "perf-security",
+    "title": "性能与安全",
+    "description": "模板性能特征（脚本编译缓存、预渲染建议）和安全注意事项（只使用可信模板来源）",
+    "difficulty": 1,
+    "template_type": "string",
+    "source": "docs/documents/performance&security.yml",
+    "category": "性能与安全"
+  },
+  {
+    "id": "ref-jsonpath",
+    "title": "JSONPath 参考",
+    "description": "fastjson2 JSONPath 语法参考：支持的操作符、过滤器和 deepScan 用法",
+    "difficulty": 1,
+    "template_type": "markdown",
+    "source": "docs/documents/jsonpath.yml",
+    "category": "参考"
+  },
+  {
+    "id": "ref-code-tips",
+    "title": "常用代码参考",
+    "description": "脚本中常用的工具类方法（StringUtils、ArrayUtils、BooleanUtils 等）",
+    "difficulty": 1,
+    "template_type": "markdown",
+    "source": "docs/documents/script-code-tips.yml",
+    "category": "参考"
+  }
+]

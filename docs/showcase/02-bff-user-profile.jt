@@ -1,0 +1,26 @@
+{
+  "@class": "parallel",
+  "tasks": {
+    "user": {
+      "@class": "try",
+      "select": {
+        "@class": "rest",
+        "url": "/users/{@id}",
+        "circuitBreaker": { "threshold": 5, "resetSec": 60 }
+      },
+      "fallback": { "error": "user service down", "id": "{@id}" }
+    },
+    "orders": { "@class": "rest", "url": "/users/{@id}/orders" },
+    "payment": {
+      "@class": "try",
+      "select": { "@class": "rest", "url": "/payments?user={@id}" },
+      "fallback": { "@class": "rest", "url": "/cache/payments/{@id}" }
+    }
+  },
+  "timeout": 300,
+  "body": {
+    "user": "{$user}",
+    "orders": "{$orders}",
+    "payment": "{$payment}"
+  }
+}

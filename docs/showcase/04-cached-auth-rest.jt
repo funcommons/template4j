@@ -1,0 +1,7 @@
+{
+  "@class": "rest",
+  "url": "/api/orders",
+  "auth": { "type": "bearer", "token": "{@token}" },
+  "cache": { "key": "orders:{@userId}", "ttl": 60000 },
+  "timeout": 5000
+}

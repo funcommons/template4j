@@ -1,0 +1,61 @@
+# Build artifacts
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+dependency-reduced-pom.xml
+
+# E2E transient screenshots
+e2e-shots/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.project
+.classpath
+.settings/
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Test/coverage reports
+*.exec
+jacoco.exec
+.coverage
+
+# Temp / runtime
+*.tmp
+*.bak
+*.swp
+*~
+
+# Node / frontend (template4j-site)
+node_modules/
+dist/
+.npm/
+.pnpm-store/
+
+# Playwright / e2e
+e2e-*-shots/
+playwright-report/
+test-results/
+
+# Local env
+.env
+.env.local
+.env.*.local
+
+# Claude (session-local state; project skill lives in skills/template4j)
+.claude/

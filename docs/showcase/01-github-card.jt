@@ -1,0 +1,22 @@
+{
+  "@class": "parallel",
+  "tasks": {
+    "user":  { "@class": "rest", "url": "https://api.github.com/users/{@login}" },
+    "repos": { "@class": "rest", "url": "https://api.github.com/users/{@login}/repos?per_page=5" }
+  },
+  "body": {
+    "login": "{$user.login}",
+    "name": "{$user.name}",
+    "avatar": "{$user.avatar_url}",
+    "followers": "{$user.followers}",
+    "topRepos": {
+      "@class": "each",
+      "select": "{$repos}",
+      "body": {
+        "name": "{$item.name}",
+        "stars": "{$item.stargazers_count}"
+      }
+    },
+    "totalStars": "{= $repos.collect{ it.stargazers_count }.sum() }"
+  }
+}

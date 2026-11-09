@@ -1,0 +1,5 @@
+{
+  "userId": "{@id}",
+  "displayName": "{@name}",
+  "tier": "{= @id > 1000 ? 'enterprise' : (@id > 100 ? 'pro' : 'free') }"
+}

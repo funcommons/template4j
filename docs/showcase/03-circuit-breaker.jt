@@ -1,0 +1,7 @@
+{
+  "@class": "rest",
+  "url": "/flaky",
+  "retry": { "count": 2, "baseMs": 100, "backoff": "exponential" },
+  "circuitBreaker": { "threshold": 3, "resetSec": 30 },
+  "error": { "status": "failed", "msg": "{$responseData.message}" }
+}

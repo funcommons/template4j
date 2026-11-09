@@ -1,0 +1,9 @@
+# Default: project maintainers
+*                            @justin
+
+# Core engine: requires extra-careful review
+/template4j-core/            @justin
+
+# Docs (lower bar)
+/manual/                     @justin
+/docs/                       @justin
