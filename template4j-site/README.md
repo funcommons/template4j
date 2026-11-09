@@ -107,7 +107,7 @@ java -jar target/template4j-site.jar              # 访问 http://localhost:8088
 | 层 | 选型 | 版本 |
 |----|------|------|
 | 引擎 | template4j-core | 0.5.0-SNAPSHOT |
-| 后端 | Spring Boot | 3.4.1 |
+| 后端 | Spring Boot | 3.5.16 |
 | JSON | Jackson（snake_case + Long→String） | Spring Boot 管理 |
 | 日志 | Log4j2 + SLF4J | Spring Boot 管理 |
 | 测试 | JUnit 4 + spring-boot-starter-test | Spring Boot 管理 |
