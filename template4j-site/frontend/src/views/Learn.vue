@@ -607,7 +607,8 @@ async function copyText(text: string, key = '') {
 
 @media (max-width: 960px) {
   .learn-layout { flex-direction: column; padding: 0 12px 24px; gap: 16px; }
-  .sidebar { width: 100%; max-height: none; position: static; }
+  /* 无全局 reset, content-box 下 padding/border 会额外撑出 +6px, 溢出修复 (e2e smoke @600) */
+  .sidebar { width: 100%; max-height: none; position: static; box-sizing: border-box; }
   .jr-grid { grid-template-columns: 1fr; }
   .jr-editor { border-right: 0; border-bottom: 1px solid #ebeef5; }
   .hero { padding: 20px 12px 12px; }

@@ -117,7 +117,7 @@ function callRender() {
 .steps h3, .output h3, .security h3 { font-size: 20px; margin: 32px 0 12px; }
 .step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; margin-bottom: 20px; }
 .step-num { background: var(--el-color-primary); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 600; font-size: 14px; }
-.step-body { background: var(--el-fill-color-light); padding: 12px 16px; border-radius: 6px; }
+.step-body { background: var(--el-fill-color-light); padding: 12px 16px; border-radius: 6px; min-width: 0; /* grid 1fr 轨道被 pre 的 min-content 撑大, overflow-x:auto 失效, 溢出修复 (e2e smoke @600) */ }
 .step-body strong { font-family: monospace; }
 .step-body p { margin: 8px 0; color: var(--el-text-color-secondary); font-size: 14px; }
 .step-body pre, .output pre { background: #1a1a1a; color: #e5e7eb; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 12px; overflow-x: auto; margin: 8px 0; }

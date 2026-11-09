@@ -5,7 +5,6 @@
         :default-active="route.path"
         mode="horizontal"
         router
-        :ellipsis="false"
         class="nav-menu"
       >
         <el-menu-item index="/">{{ t('nav.home') }}</el-menu-item>
@@ -78,6 +77,7 @@ function onLocaleChange(cmd: string) {
 }
 .nav-menu {
   flex: 1;
+  min-width: 0; /* flex item 默认 min-width:auto 不可收缩, 溢出修复 (e2e smoke @600/@800) */
   border-bottom: none;
 }
 .nav-actions {
