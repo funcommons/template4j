@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>1.5.6</version>
+            <version>3.0.9</version>
         </dependency>
 
         <!-- Groovy 编译脚本缓存 (ScriptEnvironment) -->
