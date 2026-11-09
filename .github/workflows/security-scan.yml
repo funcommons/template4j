@@ -32,7 +32,10 @@ jobs:
     name: OWASP dependency-check (fail on CVSS >= 9)
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
-    timeout-minutes: 40
+    # 60min: 无 NVD_API_KEY 时全量同步物理下限 ~30+ 分钟 (限流 5 请求/30s),
+    # NVD 慢日 (524) 下 40min 不够 (2026-11 实绩); NVD 数据库缓存跨 run 收敛,
+    # 配置 NVD_API_KEY secret 后可大幅缩短。
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
