@@ -3,6 +3,8 @@ name: security-scan
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     # 每周一 07:30 UTC（北京时间 15:30）定期扫描
     - cron: '30 7 * * 1'
@@ -12,9 +14,24 @@ permissions:
   contents: read
 
 jobs:
+  # PR 门禁：仅做 diff 视角的依赖审查（秒级，无 NVD 冷启动），全量扫描留给 push main / 每周基线
+  dependency-review:
+    name: Dependency review (PR diff gate, fail on high)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
   dependency-check:
     name: OWASP dependency-check (fail on CVSS >= 9)
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,6 +59,7 @@ jobs:
   trivy-fs:
     name: Trivy filesystem scan (CRITICAL/HIGH blocking)
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
