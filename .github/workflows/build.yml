@@ -1,0 +1,133 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  core:
+    name: core (JDK 17, ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build & test core (with JaCoCo coverage gate)
+        run: mvn -B -pl template4j-core -am verify
+
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-core
+          path: template4j-core/target/site/jacoco/
+          retention-days: 30
+
+      - name: Report core coverage summary
+        if: success()
+        run: |
+          echo "### Core Coverage" >> $GITHUB_STEP_SUMMARY
+          awk -F',' 'NR>1 {
+            miss_inst+=$4; cov_inst+=$5;
+            miss_br+=$6; cov_br+=$7;
+            miss_line+=$8; cov_line+=$9;
+          } END {
+            printf "| Metric | Covered | Total | %% |\n";
+            printf "|---|---|---|---|\n";
+            printf "| INSTRUCTION | %d | %d | %.1f%% |\n", cov_inst, cov_inst+miss_inst, cov_inst/(cov_inst+miss_inst)*100;
+            printf "| BRANCH | %d | %d | %.1f%% |\n", cov_br, cov_br+miss_br, (cov_br+miss_br>0?cov_br/(cov_br+miss_br)*100:0);
+            printf "| LINE | %d | %d | %.1f%% |\n", cov_line, cov_line+miss_line, cov_line/(cov_line+miss_line)*100;
+          }' template4j-core/target/site/jacoco/jacoco.csv >> $GITHUB_STEP_SUMMARY
+
+  site:
+    name: site (JDK 17, ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build & test site (with JaCoCo coverage gate)
+        run: mvn -B -pl template4j-site -am verify
+
+      - name: Upload JaCoCo site coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-site
+          path: template4j-site/target/site/jacoco/
+          retention-days: 30
+
+      - name: Report site coverage summary
+        if: success()
+        run: |
+          echo "### Site Coverage" >> $GITHUB_STEP_SUMMARY
+          awk -F',' 'NR>1 {
+            miss_inst+=$4; cov_inst+=$5;
+            miss_br+=$6; cov_br+=$7;
+            miss_line+=$8; cov_line+=$9;
+          } END {
+            printf "| Metric | Covered | Total | %% |\n";
+            printf "|---|---|---|---|\n";
+            printf "| INSTRUCTION | %d | %d | %.1f%% |\n", cov_inst, cov_inst+miss_inst, cov_inst/(cov_inst+miss_inst)*100;
+            printf "| BRANCH | %d | %d | %.1f%% |\n", cov_br, cov_br+miss_br, (cov_br+miss_br>0?cov_br/(cov_br+miss_br)*100:0);
+            printf "| LINE | %d | %d | %.1f%% |\n", cov_line, cov_line+miss_line, cov_line/(cov_line+miss_line)*100;
+          }' template4j-site/target/site/jacoco/jacoco.csv >> $GITHUB_STEP_SUMMARY
+
+  shade:
+    name: shade (fat jar)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build fat jar
+        run: mvn -B -Pshade -pl template4j-core -am package -DskipTests
+
+      - name: Upload fat jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: template4j-core-shaded
+          path: template4j-core/target/template4j-core-shaded.jar
+          retention-days: 14
+
+  benchmark:
+    name: benchmark (no-gate, PR only)
+    runs-on: ubuntu-latest
+    needs: core
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+      - name: Run benchmarks (template4j-core)
+        run: |
+          mvn -B -pl template4j-core -am test -Pbenchmark -DfailIfNoTests=false 2>&1 | tee benchmark.log
+          echo "### Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          grep -E "===|Warm|Cold|ns/call" benchmark.log >> $GITHUB_STEP_SUMMARY || true

@@ -1,0 +1,17 @@
+name: dependabot
+
+# Dependabot 配置: 每周检查依赖更新, 自动开 PR。
+# 与 build.yml 配合: Dependabot PR 同样走 JaCoCo gate。
+# 文档: https://docs.github.com/en/code-security/dependabot
+
+on:
+  schedule:
+    - cron: '23 4 * * 1'  # 周一 04:23 UTC (避免 0 分整点)
+  workflow_dispatch:
+
+jobs:
+  # 占位 job — 实际配置走 .github/dependabot.yml
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Dependabot config lives in .github/dependabot.yml"

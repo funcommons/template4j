@@ -1,0 +1,70 @@
+name: security-scan
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 每周一 07:30 UTC（北京时间 15:30）定期扫描
+    - cron: '30 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-check:
+    name: OWASP dependency-check (fail on CVSS >= 9)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      # 任一依赖 CVSS >= 9 阻断；关闭 RetireJS 分析器避免扫描超时
+      # 首次运行需下载 NVD 数据库，耗时较长属正常现象
+      - name: Run dependency-check
+        run: mvn -q org.owasp:dependency-check-maven:10.0.4:check -DfailBuildOnCVSS=9 -DretireJsAnalyzerEnabled=false
+
+      - name: Upload dependency-check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: '**/dependency-check-report.html'
+          retention-days: 30
+
+  trivy-fs:
+    name: Trivy filesystem scan (CRITICAL/HIGH blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 扫描仓库内配置文件 / lockfile / IaC，发现 CRITICAL 或 HIGH 即失败
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: table
+          output: 'trivy-report.txt'
+
+      - name: Print Trivy report
+        if: always()
+        run: cat trivy-report.txt
+
+      - name: Upload Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report
+          path: trivy-report.txt
+          retention-days: 30
