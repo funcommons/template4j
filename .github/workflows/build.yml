@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # nightly (UTC 18:30) full regression
+    - cron: '30 18 * * *'
 
 jobs:
   core:
@@ -131,3 +134,130 @@ jobs:
           mvn -B -pl template4j-core -am test -Pbenchmark -DfailIfNoTests=false 2>&1 | tee benchmark.log
           echo "### Benchmark Results" >> $GITHUB_STEP_SUMMARY
           grep -E "===|Warm|Cold|ns/call" benchmark.log >> $GITHUB_STEP_SUMMARY || true
+
+  frontend:
+    name: frontend (node 20, ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: template4j-site/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: template4j-site/frontend
+        run: npm ci
+
+      - name: Run frontend unit tests (vitest run)
+        working-directory: template4j-site/frontend
+        run: npm run test
+
+      - name: Build frontend (vite build)
+        working-directory: template4j-site/frontend
+        run: npm run build
+
+  e2e:
+    name: e2e (smoke on PR/push, full regression nightly)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE: http://localhost:5173
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: template4j-site/frontend/package-lock.json
+
+      - name: Install & build frontend
+        working-directory: template4j-site/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Package site jar
+        run: mvn -B -pl template4j-site -am package -DskipTests
+
+      - name: Install playwright (e2e imports it from a hardcoded global path)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw"
+          cd "$RUNNER_TEMP/pw"
+          npm install playwright
+          # e2e/lib/launch.mjs does: import('/opt/homebrew/lib/node_modules/playwright/index.mjs')
+          sudo mkdir -p /opt/homebrew/lib/node_modules
+          sudo ln -sfn "$RUNNER_TEMP/pw/node_modules/playwright" /opt/homebrew/lib/node_modules/playwright
+
+      - name: Start site backend (port 8088) and wait until ready
+        run: |
+          # SSRF 白名单/base url 与 surefire 单测配置一致 (仅回环); e2e 高频 POST 关闭演示限流
+          nohup java \
+            -Dtemplate4j.rest.allowed-hosts=127.0.0.1,localhost,0.0.0.0 \
+            -Dtemplate4j.rest.baseUrl=http://localhost:8088 \
+            -Dtemplate4j.demo.rate-limit.enabled=false \
+            -jar template4j-site/target/template4j-site.jar \
+            > "$RUNNER_TEMP/site.log" 2>&1 &
+          for _ in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8088/actuator/health || true)
+            if [ "$code" != "000" ]; then echo "site is up (HTTP $code)"; exit 0; fi
+            sleep 2
+          done
+          echo "site did not start; last log lines:"
+          tail -50 "$RUNNER_TEMP/site.log"
+          exit 1
+
+      - name: Start vite dev server (port 5173) and wait until ready
+        run: |
+          cd template4j-site/frontend
+          nohup npm run dev -- --host 127.0.0.1 --port 5173 --strictPort > "$RUNNER_TEMP/vite.log" 2>&1 &
+          for _ in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5173/ || true)
+            if [ "$code" != "000" ]; then echo "vite is up (HTTP $code)"; exit 0; fi
+            sleep 2
+          done
+          echo "vite did not start; last log lines:"
+          tail -50 "$RUNNER_TEMP/vite.log"
+          exit 1
+
+      - name: Run e2e smoke (PR / push)
+        if: github.event_name != 'schedule'
+        run: node e2e/e2e-smoke.mjs
+
+      - name: Run e2e full regression (nightly)
+        if: github.event_name == 'schedule'
+        run: |
+          export T4J_REPORT_SEQ="ci-${GITHUB_RUN_NUMBER}"
+          fail=0
+          for f in e2e/regression/bl-*.mjs; do
+            echo "=== running $f"
+            node "$f" || fail=1
+          done
+          node e2e/regression/gen-bl-report.mjs || true
+          exit $fail
+
+      - name: Upload e2e artifacts (screenshots & reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            e2e-shots/
+            test-report/
+          retention-days: 14
+          if-no-files-found: ignore
