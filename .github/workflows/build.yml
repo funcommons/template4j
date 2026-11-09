@@ -136,17 +136,17 @@ jobs:
           grep -E "===|Warm|Cold|ns/call" benchmark.log >> $GITHUB_STEP_SUMMARY || true
 
   frontend:
-    name: frontend (node 20, ubuntu)
+    name: frontend (node 22, ubuntu)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node 20
+      - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: template4j-site/frontend/package-lock.json
 
@@ -179,10 +179,10 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Set up Node 20
+      - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: template4j-site/frontend/package-lock.json
 
