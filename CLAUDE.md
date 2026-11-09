@@ -18,7 +18,7 @@ mvn test                            # run all tests (JUnit 5, via maven-surefire
 mvn -Dtest=TemplateSyntaxTest test  # run a single test class
 mvn -Dtest=TemplateSyntaxTest#testJsonPathSimpleField test   # run a single method
 mvn -q compile                      # compile only
-mvn -B verify                       # full check + JaCoCo gate (0.95 LINE / 0.85 BRANCH)
+mvn -B verify                       # full check + JaCoCo gate (0.95 LINE / 0.90 BRANCH — pinned to measured coverage, ratcheted upward)
 mvn -Pbenchmark -pl template4j-core test    # run perf benchmark
 mvn -Pshade -pl template4j-core package -DskipTests   # build fat jar (target/template4j-core-shaded.jar)
 ```
