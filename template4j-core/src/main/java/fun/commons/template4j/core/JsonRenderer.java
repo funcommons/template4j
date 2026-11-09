@@ -5,6 +5,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -21,6 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
@@ -39,16 +46,18 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
     private JsonSchema outputSchema;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /**
+     * 引擎级注入 executor (parallel 组件并发提交子任务用)。null = 使用内置默认池。
+     * 实例字段 (非静态) 保证引擎间隔离; volatile 保证渲染期间切换立即可见。
+     */
+    private volatile ExecutorService injectedExecutor;
+
     /** parseStrTemplate 结果缓存: 同一字符串模板多次渲染时复用 tokenized string + expressionMap。 */
     static final int MAX_PARSE_CACHE_ENTRIES = Integer.getInteger(
             "template4j.parseCache.maxEntries", 1024);
-    private final Map<String, ParsedStrTemplate> parseCache = Collections.synchronizedMap(
-            new LinkedHashMap<String, ParsedStrTemplate>(64, 0.75f, true) {
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<String, ParsedStrTemplate> eldest) {
-                    return size() > MAX_PARSE_CACHE_ENTRIES;
-                }
-            });
+    private final Cache<String, ParsedStrTemplate> parseCache = Caffeine.newBuilder()
+            .maximumSize(MAX_PARSE_CACHE_ENTRIES)
+            .build();
 
     /** parseStrTemplate 不可变结果: tokenized string + expressionMap。 */
     private static final class ParsedStrTemplate {
@@ -58,6 +67,17 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
             this.tokenized = tokenized;
             this.expressionMap = Collections.unmodifiableMap(expressionMap);
         }
+    }
+
+    /** 当前缓存条目数 (估算): 先触发清理, 再取估值。 */
+    int parseCacheSize() {
+        parseCache.cleanUp();
+        return (int) parseCache.estimatedSize();
+    }
+
+    /** 清空解析缓存。 */
+    void clearParseCache() {
+        parseCache.invalidateAll();
     }
 
     public TemplateLoader getTemplateLoader() {
@@ -101,9 +121,9 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
     }
 
     @Override
-    public RenderEngine withTraceConsumer(@NonNull Consumer<RenderEngine.TraceEvent> consumer) {
+    public RenderEngine.TraceHandle addTraceConsumer(@NonNull Consumer<RenderEngine.TraceEvent> consumer) {
         traceConsumers.add(consumer);
-        return this;
+        return () -> traceConsumers.remove(consumer);
     }
 
     @Override
@@ -115,6 +135,35 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
     @Override
     public RenderEngine withOutputSchema(Object schemaContent) {
         this.outputSchema = compileSchema(schemaContent);
+        return this;
+    }
+
+    @Override
+    public JsonRenderer withSandbox(boolean enabled) {
+        scripts.setSandboxEnabled(enabled);
+        return this;
+    }
+
+    @Override
+    public RenderEngine withExecutor(ExecutorService executor) {
+        this.injectedExecutor = executor;
+        return this;
+    }
+
+    /**
+     * 当前引擎注入的 executor, 供 parallel 组件提交任务; null 表示回退内置默认池。
+     * public 而非 package-private: components 子包的 ParallelRenderer 需跨包读取。
+     */
+    public ExecutorService executorForParallel() {
+        return injectedExecutor;
+    }
+
+    @Override
+    public RenderEngine withRestOptions(fun.commons.template4j.core.components.RestOptions options) {
+        // rest 组件每引擎注册一个实例 (ComponentRegistry by name); null 同样转发 = 清除, 回退静态默认
+        if (components.find("rest") instanceof fun.commons.template4j.core.components.RestRenderer rest) {
+            rest.setRestOptions(options);
+        }
         return this;
     }
 
@@ -180,6 +229,44 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
     }
 
     @Override
+    public Object render(Object template, Map<String, Object> data, RenderOptions options) throws RenderException {
+        if (options == null) {
+            return render(template, data);
+        }
+        // 请求级 trace 订阅: 渲染结束后立即反注册, 引擎零残留
+        RenderEngine.TraceHandle handle = options.traceConsumer() == null
+                ? null : addTraceConsumer(options.traceConsumer());
+        try {
+            if (options.timeoutMs() <= 0) {
+                return render(template, data);
+            }
+            // 限时渲染: 内部渲染跑在守护线程, 到点中断并抛 RenderException
+            FutureTask<Object> future = new FutureTask<>(() -> render(template, data));
+            Thread worker = new Thread(future, "template4j-render-timeout");
+            worker.setDaemon(true);
+            worker.start();
+            try {
+                return future.get(options.timeoutMs(), TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                future.cancel(true);
+                throw new RenderException("/", "render",
+                        "render timed out after " + options.timeoutMs() + "ms");
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause() == null ? e : e.getCause();
+                if (cause instanceof RenderException re) throw re;
+                if (cause instanceof RuntimeException rt) throw rt;
+                if (cause instanceof Error err) throw err;
+                throw new RenderException("/", "render", "render failed: " + cause.getMessage(), cause);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RenderException("/", "render", "render interrupted", e);
+            }
+        } finally {
+            if (handle != null) handle.remove();
+        }
+    }
+
+    @Override
     public Template compile(Object template) throws RenderException {
         // 触发一次预渲染以填充 parseStrCache, 同时验证模板语法。
         // 即便忽略此 warmup, 后续 render 也会自动命中缓存。
@@ -226,7 +313,7 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
 
     private Object renderString(String strValue, SelfObject self) throws RenderException {
         // 命中缓存: 复用 tokenized string + expressionMap, 避免重做 6 次 StringSubstitutor 扫描
-        ParsedStrTemplate parsed = parseCache.get(strValue);
+        ParsedStrTemplate parsed = parseCache.getIfPresent(strValue);
         if (parsed == null) {
             Map<String, String> exprMap = new LinkedHashMap<>();
             String tokenized = TemplateUtil.parseStrTemplate(strValue, exprMap);

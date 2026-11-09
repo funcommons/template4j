@@ -8,7 +8,11 @@ import lombok.NonNull;
 
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 
@@ -66,10 +70,28 @@ public interface RenderEngine {
     RenderEngine withComponent(RenderComponent component);
 
     /**
-     * 注册 trace 事件消费者。多次调用追加 (多 consumer 都会被通知)。
+     * 可反注册的 trace 订阅句柄。流式渲染等临时订阅场景必须在结束时 {@link #close()},
+     * 否则消费者会泄漏在共享引擎上, 造成跨请求性能污染。
+     */
+    interface TraceHandle extends AutoCloseable {
+        void remove();
+        @Override default void close() { remove(); }
+    }
+
+    /**
+     * 注册 trace 事件消费者并返回可反注册的句柄。多次调用追加 (多 consumer 都会被通知)。
      * 默认无 consumer, 所有 trace 调用零开销。
      */
-    RenderEngine withTraceConsumer(@NonNull Consumer<TraceEvent> consumer);
+    TraceHandle addTraceConsumer(@NonNull Consumer<TraceEvent> consumer);
+
+    /**
+     * 注册 trace 事件消费者 (常驻订阅, 兼容旧 API)。
+     * 临时订阅请使用 {@link #addTraceConsumer(Consumer)} 并在结束时 close。
+     */
+    default RenderEngine withTraceConsumer(@NonNull Consumer<TraceEvent> consumer) {
+        addTraceConsumer(consumer);
+        return this;
+    }
 
     /**
      * 注册输入数据 JSON Schema。渲染前校验 data 是否匹配, 不匹配则抛 RenderException。
@@ -82,6 +104,29 @@ public interface RenderEngine {
      * @param schemaContent JSON 字符串 / Map / null
      */
     RenderEngine withOutputSchema(Object schemaContent);
+
+    /**
+     * 开启 / 关闭 Groovy 沙箱。开启后模板中的 Groovy 片段 ({@code {= }} / {@code {% %}}) 在受限
+     * 环境执行: 循环语句 (while / do-while / for) 编译期拒绝; File / Runtime / System / Class /
+     * Eval 等危险调用运行期拦截 (白名单: Func* beans、fastjson2 容器、Map/List、Math、StringUtils)。
+     * 违规抛 {@link RenderException}, message 含 "sandbox"。默认关闭, 关闭时与未开启前行为完全一致。
+     */
+    RenderEngine withSandbox(boolean enabled);
+
+    /**
+     * 注入引擎级 {@link ExecutorService}, 供 {@code @class: parallel} 组件并发提交子任务。
+     * 注入后该引擎的所有 parallel 任务优先在此 executor 上执行 (便于接入应用统一线程池 / 监控);
+     * 同步渲染路径不经过它。executor 按引擎实例隔离, 引擎不管理其生命周期 (shutdown 由调用方负责)。
+     * 传 null 恢复内置默认池 (daemon FixedThreadPool, template4j.parallel.poolSize)。
+     */
+    RenderEngine withExecutor(ExecutorService executor);
+
+    /**
+     * 注入引擎级 rest 组件配置 (baseUrl / allowedHosts / maxResponseBytes), 仅影响本引擎的
+     * {@code @class: rest} 调用: 实例值优先, 未设置字段回退 RestRenderer 静态默认
+     * (系统属性 {@code template4j.rest.*})。传 null 清除, 全部回退静态默认。
+     */
+    RenderEngine withRestOptions(fun.commons.template4j.core.components.RestOptions options);
     /**
      * 预编译模板句柄: 线程安全, 可多次 render 不同数据。
      * 通过 {@link #compile(Object)} / {@link #compileJson(String)} / {@link #compileYaml(String)} 获取。
@@ -134,6 +179,32 @@ public interface RenderEngine {
      * @return 转换后的结果
      */
     Object render(Object template, Map<String,Object> data) throws RenderException;
+
+    /**
+     * 请求级渲染: 通过 {@link RenderOptions} 为本次渲染单独指定 trace 订阅 / 超时,
+     * 不影响引擎全局状态 (trace 订阅在渲染结束后自动移除)。
+     * @param template 模板 String,JSONObject,JSONArray, 其它原样返样template
+     * @param data 数据 JSONObject
+     * @param options 渲染选项 (null 等价于 {@link #render(Object, Map)})
+     * @return 转换后的结果
+     */
+    Object render(Object template, Map<String,Object> data, RenderOptions options) throws RenderException;
+
+    /**
+     * 流式渲染: 把 render() 包成流式订阅器,边渲染边吐 trace 事件,最后给结果。
+     * 实现原理: 在新线程跑 render(), trace 事件实时进入 subscriber 的 onNext, 完成时 onNext 推一个
+     *          包含 "type=RESULT" 的终态事件, 然后 onComplete。失败走 onError。
+     *
+     * <pre>
+     *   RenderEngine.build().renderStream(template, data).subscribe(
+     *       ev -> System.out.println(ev.format()),
+     *       err -> err.printStackTrace(),
+     *       () -> System.out.println("done"));
+     * </pre>
+     */
+    default RenderStream renderStream(Object template, Map<String, Object> data) {
+        return new RenderStream(this, template, data);
+    }
 
     /**
      * <pre>

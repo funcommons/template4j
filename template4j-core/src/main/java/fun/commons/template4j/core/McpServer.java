@@ -67,8 +67,8 @@ public class McpServer {
         }
     }
 
-    /** 测试入口: 处理单个请求并返回响应 (JSON 字符串)。 */
-    static String handle(String requestJson) {
+    /** 测试入口 / 跨模块入口: 处理单个请求并返回响应 (JSON 字符串)。 */
+    public static String handle(String requestJson) {
         JSONObject request = JSON.parseObject(requestJson);
         // 测试时把响应收集到 buffer
         java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();

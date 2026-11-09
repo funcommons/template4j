@@ -1,6 +1,7 @@
 package fun.commons.template4j.core.components;
 
 import com.alibaba.fastjson2.JSONObject;
+import fun.commons.template4j.core.JsonRenderer;
 import fun.commons.template4j.core.RenderComponent;
 import fun.commons.template4j.core.RenderException;
 import org.apache.commons.lang3.BooleanUtils;
@@ -20,7 +21,8 @@ import java.util.concurrent.TimeUnit;
  * <p>典型用于 BFF 场景下的多接口聚合: 多个 @class:rest 同时发起,
  * 整体超时后走 error 分支, 任一失败默认会让整张模板走 error (除非 continueOnError=true)。
  *
- * <p>线程池: 共享一个 daemon FixedThreadPool(16)。每个 task 在子 SelfObject 下执行,
+ * <p>线程池: 优先使用所属引擎通过 {@code withExecutor} 注入的 executor; 未注入时回退到
+ * 共享的 daemon FixedThreadPool(16)。每个 task 在子 SelfObject 下执行,
  * 与 parent 数据隔离。RestRenderer 的 HttpClient 也是共享的, 真正并发由其内部线程池实现。
  */
 public class ParallelRenderer implements RenderComponent {
@@ -64,6 +66,13 @@ public class ParallelRenderer implements RenderComponent {
         boolean continueOnError = parseBooleanField(context, "continueOnError", false);
         long deadline = System.currentTimeMillis() + timeoutMs;
 
+        // 任务提交目标: 所属引擎注入的 executor 优先, 未注入 (或 renderer 非默认实现) 回退内置默认池
+        ExecutorService executor = EXECUTOR;
+        if (context.renderer instanceof JsonRenderer engine) {
+            ExecutorService injected = engine.executorForParallel();
+            if (injected != null) executor = injected;
+        }
+
         Map<String, CompletableFuture<Object>> futures = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : tasksMap.entrySet()) {
             String taskName = entry.getKey();
@@ -76,7 +85,7 @@ public class ParallelRenderer implements RenderComponent {
                             throw new CompletionException(ex);
                         }
                     },
-                    EXECUTOR);
+                    executor);
             futures.put(taskName, f);
         }
 

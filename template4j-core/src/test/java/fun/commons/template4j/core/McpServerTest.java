@@ -167,4 +167,325 @@ public class McpServerTest {
         Assertions.assertEquals(8, r.getIntValue("id"));
         Assertions.assertNotNull(r.get("result"));
     }
+
+    // ---- 边界覆盖 ----
+
+    @Test
+    public void toolsCallAsNotificationProducesNoResponse() {
+        // 没有 id 的 tools/call 是 notification → 无响应
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("template", "{\"v\":\"{@v}\"}");
+        args.put("data", JSON.parseObject("{\"v\":1}"));
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "tools/call");
+        req.put("params", params);
+        // 没有 id
+
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty(),
+                "notification should produce no response, got: " + resp);
+    }
+
+    @Test
+    public void toolsCallWithBogusToolReturnsIsError() {
+        JSONObject params = new JSONObject();
+        params.put("name", "totally-bogus");
+        params.put("arguments", new JSONObject());
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 99);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertTrue(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void toolsCallMissingNameReturnsError() {
+        JSONObject params = new JSONObject();
+        // 不设 name
+        params.put("arguments", new JSONObject());
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 100);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        // unknown tool: null name 不等于 "render_template" → 抛 McpToolException
+        Assertions.assertTrue(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void toolsCallMissingArgumentsReturnsError() {
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        // 不设 arguments
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 101);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertTrue(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void toolsCallMissingTemplateReturnsError() {
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("data", new JSONObject());  // 不设 template
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 102);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertTrue(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void initializeAsNotificationNoResponse() {
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "initialize");
+        // 无 id
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void toolsListAsNotificationNoResponse() {
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "tools/list");
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void nullMethodReturnsMethodNotFound() {
+        // method 字段缺失 → null → 走 default 分支
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 200);
+        // 不设 method
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertEquals(-32601, r.getJSONObject("error").getIntValue("code"));
+    }
+
+    @Test
+    public void formatYamlUpperCaseRendersYaml() {
+        // format="YAML" 大小写不敏感, 走 yaml 分支
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("template", "v: \"{@v}\"\n");
+        args.put("data", JSON.parseObject("{\"v\":\"x\"}"));
+        args.put("format", "YAML");
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 201);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void formatMissingDefaultsToJson() {
+        // 没传 format → 默认 json
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("template", "{\"v\":\"{@v}\"}");
+        args.put("data", JSON.parseObject("{\"v\":7}"));
+        // 不传 format
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 202);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.getJSONObject("result").getBooleanValue("isError"));
+        String text = r.getJSONObject("result").getJSONArray("content")
+                .getJSONObject(0).getString("text");
+        Assertions.assertTrue(text.contains("7"));
+    }
+
+    @Test
+    public void dataMissingDefaultsToEmpty() {
+        // 没传 data → 默认空 JSONObject
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("template", "{\"v\":\"static\"}");
+        // 不传 data
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 203);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void initializedAsNotification() {
+        // "initialized" 走 notification no-op 分支
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "initialized");
+        // 没 id
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void initializedWithIdAlsoNoResponseBecauseNotification() {
+        // "initialized" 是 notification, 即使带 id 也不响应 (wantsResponse=true 但 case 内不响应)
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 204);
+        req.put("method", "initialized");
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void unknownMethodAsNotificationNoResponse() {
+        // unknown method 但无 id → 不响应
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "totally/bogus");
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void nullIdNotificationHasNoResponse() {
+        // fastjson2 默认不序列化 null, 所以 id=null 在 wire 上等同 notification
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", null);
+        req.put("method", "ping");
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void pingAsNotificationHasNoResponse() {
+        // ping 也走 wantsResponse=true/false 分支
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("method", "ping");
+        String resp = McpServer.handle(req.toJSONString());
+        Assertions.assertTrue(resp == null || resp.isEmpty());
+    }
+
+    @Test
+    public void idExplicitlyNullInJsonStringResponseOmitsId() {
+        // 用 JSON 字符串显式传 id:null, fastjson2 parse 后 containsKey("id")=true 但 id=null
+        // → okResponse 的 if(id!=null) 分支走 false
+        String resp = McpServer.handle(
+                "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"ping\"}");
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.containsKey("id"));
+        Assertions.assertNotNull(r.get("result"));
+    }
+
+    @Test
+    public void toolsCallWithYamlTemplateMissingDataDefaultsEmpty() {
+        // 故意只传 template 不传 data → data 走 null 分支
+        JSONObject params = new JSONObject();
+        params.put("name", "render_template");
+        JSONObject args = new JSONObject();
+        args.put("template", "{\"x\":1}");
+        args.put("format", "yaml");
+        // 不传 data
+        params.put("arguments", args);
+        JSONObject req = new JSONObject();
+        req.put("jsonrpc", "2.0");
+        req.put("id", 300);
+        req.put("method", "tools/call");
+        req.put("params", params);
+
+        String resp = McpServer.handle(req.toJSONString());
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.getJSONObject("result").getBooleanValue("isError"));
+    }
+
+    @Test
+    public void errorResponseWithNullIdOmitsIdField() {
+        // id 显式 null → errorResponse 的 if (id != null) 走 false → 不带 id 字段
+        String resp = McpServer.handle(
+                "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"totally-bogus\"}");
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.containsKey("id"));
+        Assertions.assertNotNull(r.getJSONObject("error"));
+    }
+
+    @Test
+    public void toolErrorResponseWithNullIdOmitsIdField() {
+        // 触发 tools/call 失败路径 → toolErrorResponse → id=null 时不带 id
+        String resp = McpServer.handle(
+                "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"tools/call\",\"params\":{\"name\":\"bogus\"}}");
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.containsKey("id"));
+        Assertions.assertNotNull(r.getJSONObject("result"));
+    }
+
+    @Test
+    public void initializeWithNullIdReturnsNoIdField() {
+        // initialize + null id → okResponse if(id!=null) 走 false
+        String resp = McpServer.handle(
+                "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"initialize\"}");
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.containsKey("id"));
+        Assertions.assertNotNull(r.getJSONObject("result").get("protocolVersion"));
+    }
+
+    @Test
+    public void toolsListWithNullIdOmitsIdField() {
+        String resp = McpServer.handle(
+                "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"tools/list\"}");
+        JSONObject r = JSON.parseObject(resp);
+        Assertions.assertFalse(r.containsKey("id"));
+        Assertions.assertNotNull(r.getJSONObject("result").getJSONArray("tools"));
+    }
+
+    @Test
+    public void mainHandlesSingleRequest() throws Exception {
+        // 测试 main 通过 handle(String) 入口: 单请求验证
+        java.lang.reflect.Method m = McpServer.class.getDeclaredMethod("handle", String.class);
+        m.setAccessible(true);
+        String r = m.invoke(null,
+                "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}")
+                .toString().trim();
+        Assertions.assertTrue(r.contains("\"id\":1"));
+        Assertions.assertTrue(r.contains("\"result\""));
+    }
 }

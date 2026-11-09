@@ -11,8 +11,6 @@ import java.nio.file.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * 命令行入口: 用模板 + 数据 → 渲染结果。
@@ -164,10 +162,44 @@ public class Cli {
     }
 
     private static void printVersion() {
+        String v = System.getProperty("template4j.version");
+        if (v == null) {
+            v = readVersionFromJarManifest();
+        }
+        if (v == null) {
+            v = readVersionFromPackage();
+        }
+        System.out.println("template4j " + (v != null ? v : "dev"));
+    }
+
+    /** 从 JAR manifest 读取 Implementation-Version。shaded fat jar 场景。返回 null 表示读不到。 */
+    static String readVersionFromJarManifest() {
+        java.net.URL url;
+        try {
+            url = Cli.class.getProtectionDomain().getCodeSource().getLocation();
+        } catch (Exception e) {
+            return null;
+        }
+        return readVersionFromJarManifest(url);
+    }
+
+    /** 从给定 URL 读 manifest Implementation-Version(测试用 overload)。 */
+    static String readVersionFromJarManifest(java.net.URL url) {
+        if (url == null) return null;
+        try (java.io.InputStream is = url.openStream();
+             java.util.jar.JarInputStream jis = new java.util.jar.JarInputStream(is)) {
+            java.util.jar.Manifest mf = jis.getManifest();
+            if (mf == null) return null;
+            return mf.getMainAttributes().getValue("Implementation-Version");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 从 Package metadata 读取 Implementation-Version。返回 null 表示读不到。 */
+    static String readVersionFromPackage() {
         Package p = Cli.class.getPackage();
-        String v = p != null && p.getImplementationVersion() != null
-                ? p.getImplementationVersion() : "dev";
-        System.out.println("template4j " + v);
+        return p != null ? p.getImplementationVersion() : null;
     }
 
     /** watch 命令: 启动 dev server, 监听模板目录变化热重载。 */
