@@ -1,0 +1,14 @@
+# Trivy 豁免清单 (trivy fs . 自动读取本文件)。
+# 豁免必须带理由 + 解除条件, 定期复审; 升级到位后立即删除对应条目。
+
+# CVE-2026-47884 (CRITICAL): spring-webmvc XsltView 路径限制缺陷致 RCE。
+# 修复仅存在于 Spring Framework 7.0.9+ (6.2 OSS 线已终止, 6.2.19 为终点版本)。
+# 本站为纯 JSON/SSE 演示站, 未使用 XSLT 视图 (无 XsltView bean), 不触达缺陷路径。
+# 解除条件: Spring Boot 4 / Framework 7 升级立项后删除本条。
+CVE-2026-47884
+
+# CVE-2026-47890: spring-webmvc/webflux SSE 流损坏 (两模块共用代码, advisory 同时标注)。
+# 同上: 补丁仅在 7.0.x 线。本站 StreamController 走 MVC SseEmitter 而非 view-based SSE,
+# 与 advisory 描述的触发路径 ("with view...") 不同。
+# 解除条件: Spring Boot 4 / Framework 7 升级立项后删除本条。
+CVE-2026-47890
