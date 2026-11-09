@@ -12,19 +12,14 @@
 
 | Job | 工具 | 失败条件（卡口） |
 | --- | --- | --- |
-| `dependency-check` | OWASP dependency-check-maven 10.0.4 | 任一依赖 CVSS ≥ 9 即阻断（`-DfailBuildOnCVSS=9`）；已关闭 RetireJS 分析器（`-DretireJsAnalyzerEnabled=false`）以容忍扫描超时 |
-| `trivy-fs` | aquasecurity/trivy-action@master（fs 扫描） | 发现 CRITICAL / HIGH 级别问题即失败（`exit-code: 1`） |
+| `dependency-check` | OWASP dependency-check-maven 10.0.4 | 任一依赖 CVSS ≥ 9 即阻断（`-DfailBuildOnCVSS=9`）；已关闭 RetireJS 分析器（`-DretireJsAnalyzerEnabled=false`）以容忍扫描超时。NVD 数据库按周缓存 + `-DfailOnError=false`（NVD API 偶发 524 不终止分析，该轮检测降级、随缓存收敛）；可选 secret `NVD_API_KEY` 提升全量拉取速度 |
+| `trivy-fs` | aquasecurity/trivy-action@v0.36.0（fs 扫描，版本 pin 死） | 发现 CRITICAL / HIGH 级别问题即失败（`exit-code: 1`）。扫描前先 `mvn dependency:go-offline` 填充本地 Maven 仓——空 `~/.m2` 下逐 pom 直连 Maven Central 会撞 429 全 IP 封禁 30min |
 
 两个 job 的扫描报告均以 artifacts 上传（`dependency-check-report` / `trivy-fs-report`），job 失败也会上传（`if: always()`），便于事后排查。
 
-## Dependabot alerts（需管理员手动开启）
+## Dependabot alerts（已开启 ✅ 2026-11-09）
 
-仓库已有 [`.github/dependabot.yml`](../.github/dependabot.yml)（maven + github-actions，每周一更新），但 **Dependabot alerts 当前处于关闭状态**。开启步骤（需要仓库管理员权限，无法通过提交文件自动化）：
-
-1. 仓库页 → **Settings** → **Code security**（Code security and analysis）
-2. 找到 **Dependabot alerts** → 点击 **Enable**
-3. 建议同时确认 **Dependabot version updates** 已启用（读取已有 dependabot.yml 即生效）
-4. 开启后 Security 标签页会展示依赖告警；CI 中 dependency-check / trivy 的命中可与 GitHub advisory 交叉对照
+仓库已有 [`.github/dependabot.yml`](../.github/dependabot.yml)（maven + github-actions，每周一更新）。Dependabot vulnerability alerts 与 automated security fixes 已于 2026-11-09 通过 API 开启；开启后 security updates 立即对前端 npm lockfile 生效（tinypool / @intlify/core-base / vue-i18n / vite 四个修复更新自动开跑）——这类存量漏洞 PR diff 门禁看不到，两层互补。已知缺口：dependabot.yml 尚无 npm ecosystem 条目（前端暂无每周例行版本更新，只有出漏洞才修）。
 
 ## 本地复跑
 

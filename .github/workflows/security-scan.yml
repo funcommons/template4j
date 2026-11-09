@@ -32,6 +32,7 @@ jobs:
     name: OWASP dependency-check (fail on CVSS >= 9)
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,10 +44,33 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      # 任一依赖 CVSS >= 9 阻断；关闭 RetireJS 分析器避免扫描超时
-      # 首次运行需下载 NVD 数据库，耗时较长属正常现象
+      # NVD 数据库按周缓存: 首跑需全量拉取(可达 30min+), 之后走增量更新。
+      # restore-keys 取最近一周缓存续用, 新周键落盘形成滚动快照。
+      - name: Compute NVD cache week
+        id: nvdweek
+        run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache NVD database
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: odc-nvd-${{ steps.nvdweek.outputs.week }}
+          restore-keys: |
+            odc-nvd-
+
+      # 任一依赖 CVSS >= 9 阻断；关闭 RetireJS 分析器避免扫描超时。
+      # failOnError=false: NVD API 偶发 524/限流不终止分析 (2026-11-09 首跑实绩:
+      # 无 key 全量拉取撞上 NVD 524 → NoDataException 致命失败); 该次检测能力降级
+      # (仅 Central 元数据), 随缓存累积与每周增量收敛。
+      # NVD_API_KEY 为可选 secret (nvd.nist.gov 免费申请, `gh secret set NVD_API_KEY`),
+      # 未配置时视为无 key, 不影响流程。
       - name: Run dependency-check
-        run: mvn -q org.owasp:dependency-check-maven:10.0.4:check -DfailBuildOnCVSS=9 -DretireJsAnalyzerEnabled=false
+        run: >
+          mvn -q org.owasp:dependency-check-maven:10.0.4:check
+          -DfailBuildOnCVSS=9 -DretireJsAnalyzerEnabled=false
+          -DfailOnError=false -DnvdApiKey="${NVD_API_KEY}"
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
       - name: Upload dependency-check report
         if: always()
@@ -60,13 +84,28 @@ jobs:
     name: Trivy filesystem scan (CRITICAL/HIGH blocking)
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 扫描仓库内配置文件 / lockfile / IaC，发现 CRITICAL 或 HIGH 即失败
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      # 先把依赖填进本地 ~/.m2 再扫描: trivy 扫多模块 Maven 工程会逐 pom 直连 Maven
+      # Central, 空 cache 时数千次请求会撞 429 全 IP 封禁 30min (2026-11-09 首跑实绩:
+      # log4j-bom pom 429 → FATAL)。primed 之后 trivy 仅本地解析, 不再打 Central。
+      - name: Prime local Maven cache
+        run: mvn -B -ntp dependency:go-offline
+
+      # 扫描仓库内配置文件 / lockfile / IaC，发现 CRITICAL 或 HIGH 即失败。
+      # 版本 pin 死, 不跟 master 移动靶。
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: '.'
