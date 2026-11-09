@@ -170,3 +170,27 @@
 ```
 
 沿用第一轮流程约束：每任务 ≤1000 行、写测试→写业务→测试→修复 ≤4 轮、子 agent 单用途、全量测试按阈值触发。
+
+---
+
+## 执行状态（已全部完成 ✅ 2026-11-09）
+
+按第一轮流程约束（≤1000 行/步、写测试→写业务→测试→修复 ≤4 轮、子 agent 单用途、阈值触发全量）执行完毕，全程记录见 `round2-execution-state.md`。
+
+| 方案项 | 落库 | 备注 |
+| --- | --- | --- |
+| S1 限流两缺陷 | dc9ace8 + 25013fb | trust-proxy/Caffeine 有界桶 + 17 组防御分支测试；RateLimitFilter 类 LINE 100% |
+| P1 沙箱脚本缓存 | 238a26f | miss 即 put 契约；批测 9/9 |
+| S4 PR 扫描门禁 | ce6ed84 | dependency-review@v4；**待用户开 Dependency graph** |
+| A2 CI 补 job | 393aa30 | frontend 22s 绿；e2e PR smoke / nightly 全量 |
+| P2 trace 零分配 | 238a26f | 全调用点守卫 + TOCTOU 防御 |
+| A3 gauge 真值 | 238a26f | ScriptCacheStats 可选能力接口 |
+| S2 沙箱 imports | 6ec226c | 默认/显式分离存储；诚实边界（Groovy 固有默认导入→运行期白名单兜底）写入 javadoc |
+| S3 注入审计 | 238a26f | 11 用例钉死"数据≠模板"，无 FINDING |
+| P3 虚拟线程 | 238a26f | V21 反射隔离 + jacoco 平台类排除 |
+| A1 落盘提交 | feat/v0.5 全程 | 15 commits / PR #1 / CI 9 绿 |
+| 观察池 P4/A4 | 未动 | 按方案"等真实信号" |
+
+**计划外收获**：T0b CodeQL 5 error 修复（25731a9）；T10 e2e smoke 首跑抓到 600/800px 真实溢出三根因并修复（6b25c1f）。
+
+**三端终态**：core 1635 / site 200 / frontend 33 全绿；门禁 LINE 95.74% / BRANCH 90.48%；CodeQL 0 error。
