@@ -1,0 +1,192 @@
+{
+  "bl": "BL-02",
+  "name": "模板演练场 Playground",
+  "desc": "核心交互演练场：预设加载、JSON/YAML/String、手动渲染、快捷键、片段、格式化、分享、Trace、错误、持久化、文件加载",
+  "startedAt": "2026-09-20T08:20:40.077Z",
+  "finishedAt": "2026-09-20T08:21:52.640Z",
+  "cases": [
+    {
+      "id": "P-01",
+      "name": "加载与默认预设自动渲染",
+      "status": "pass",
+      "durationMs": 3201,
+      "evidence": [
+        "P-01-01-default-render.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-02",
+      "name": "四个预设逐一加载渲染",
+      "status": "pass",
+      "durationMs": 17631,
+      "evidence": [
+        "P-02-01-last-preset.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-03",
+      "name": "模板类型 JSON/YAML/String 切换",
+      "status": "pass",
+      "durationMs": 3100,
+      "evidence": [
+        "P-03-01-type-string.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-04",
+      "name": "手动编辑模板并点击渲染",
+      "status": "pass",
+      "durationMs": 2700,
+      "evidence": [
+        "P-04-01-manual-render.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-05",
+      "name": "Ctrl+Enter 快捷键渲染",
+      "status": "pass",
+      "durationMs": 2425,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-06",
+      "name": "代码片段插入",
+      "status": "pass",
+      "durationMs": 2540,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-07",
+      "name": "格式化 JSON 数据",
+      "status": "pass",
+      "durationMs": 2849,
+      "evidence": [
+        "P-07-01-formatted.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-08",
+      "name": "清空按钮",
+      "status": "pass",
+      "durationMs": 2932,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-09",
+      "name": "分享链接生成与状态回填",
+      "status": "pass",
+      "durationMs": 4933,
+      "evidence": [
+        "P-09-01-share-clicked.png",
+        "P-09-02-share-restore.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-10",
+      "name": "Trace 开关与事件面板",
+      "status": "pass",
+      "durationMs": 4351,
+      "evidence": [
+        "P-10-01-trace-events.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-11",
+      "name": "Raw 原始输出 Tab",
+      "status": "pass",
+      "durationMs": 3409,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-12",
+      "name": "脚本错误 → 友好错误面板",
+      "status": "pass",
+      "durationMs": 3642,
+      "evidence": [
+        "P-12-01-render-error.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-13",
+      "name": "数据 JSON 非法提示",
+      "status": "pass",
+      "durationMs": 2732,
+      "evidence": [
+        "P-13-01-invalid-data.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-14",
+      "name": "Ctrl+S 保存与刷新持久化",
+      "status": "pass",
+      "durationMs": 5083,
+      "evidence": [
+        "P-14-01-persisted-after-reload.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-15",
+      "name": "YAML 模板渲染",
+      "status": "pass",
+      "durationMs": 2603,
+      "evidence": [
+        "P-15-01-yaml-render.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-16",
+      "name": "加载 JSON 文件到数据面板",
+      "status": "pass",
+      "durationMs": 2930,
+      "evidence": [
+        "P-16-01-file-loaded.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-17",
+      "name": "三栏布局无横向溢出",
+      "status": "pass",
+      "durationMs": 2585,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 17,
+    "pass": 17,
+    "fail": 0
+  }
+}

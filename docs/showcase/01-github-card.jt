@@ -17,6 +17,6 @@
         "stars": "{$item.stargazers_count}"
       }
     },
-    "totalStars": "{= $repos.collect{ it.stargazers_count }.sum() }"
+    "totalStars": "{= $repos*.stargazers_count.sum() }"
   }
 }

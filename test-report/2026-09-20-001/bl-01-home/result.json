@@ -1,0 +1,97 @@
+{
+  "bl": "BL-01",
+  "name": "门户与首页",
+  "desc": "官网首页：hero 区、示例演示 tab、CTA、功能卡片、依赖坐标复制、统计数字",
+  "startedAt": "2026-09-20T04:56:24.706Z",
+  "finishedAt": "2026-09-20T04:56:45.548Z",
+  "cases": [
+    {
+      "id": "H-01",
+      "name": "首页加载整体渲染",
+      "status": "pass",
+      "durationMs": 2252,
+      "evidence": [
+        "H-01-01-home-full.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-02",
+      "name": "Hero 示例 Tab 切换联动",
+      "status": "pass",
+      "durationMs": 4177,
+      "evidence": [
+        "H-02-01-tab-initial.png",
+        "H-02-02-tab-switched.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-03",
+      "name": "CTA 跳转 Playground",
+      "status": "pass",
+      "durationMs": 2768,
+      "evidence": [
+        "H-03-01-cta-playground.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-04",
+      "name": "CTA 跳转 Learn",
+      "status": "pass",
+      "durationMs": 1634,
+      "evidence": [
+        "H-04-01-cta-learn.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-05",
+      "name": "Maven 依赖坐标复制",
+      "status": "pass",
+      "durationMs": 1942,
+      "evidence": [
+        "H-05-01-copy-deps.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-06",
+      "name": "统计数字与 MCP 提示区",
+      "status": "pass",
+      "durationMs": 1465,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-07",
+      "name": "Hero 门面演示开箱可渲染",
+      "status": "fail",
+      "durationMs": 2667,
+      "evidence": [
+        "H-07-01-hero-demo-output.png",
+        "H-07-02-zz-final-fullpage.png",
+        "H-07-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "首页 hero 演示应展示渲染结果, 实际显示兜底文案: \"输出(需要 /users /orders mock 端点)\" (后端缺 /users /orders mock 端点, /api/try 返回 400)"
+        }
+      ],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 6,
+    "fail": 1
+  }
+}

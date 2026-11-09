@@ -1,0 +1,127 @@
+{
+  "bl": "BL-09",
+  "name": "全局导航与国际化",
+  "desc": "主导航全路由可达、未知路径兜底、中英文切换、语言持久化、i18n 缺失 key 巡检",
+  "startedAt": "2026-09-20T05:05:25.552Z",
+  "finishedAt": "2026-09-20T05:06:20.760Z",
+  "cases": [
+    {
+      "id": "N-01",
+      "name": "8 个主路由全部可达",
+      "status": "pass",
+      "durationMs": 10292,
+      "evidence": [
+        "N-01-01-routes-all-last.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-02",
+      "name": "未知路径兜底（404 页）",
+      "status": "fail",
+      "durationMs": 1536,
+      "evidence": [
+        "N-02-01-unknown-route.png",
+        "N-02-02-zz-final-fullpage.png",
+        "N-02-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "未知路径应展示 404 提示, 实际内容区为空/无提示: \"\""
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "N-03",
+      "name": "中英切换即时生效",
+      "status": "pass",
+      "durationMs": 4897,
+      "evidence": [
+        "N-03-01-lang-en.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-04",
+      "name": "语言选择刷新持久化",
+      "status": "pass",
+      "durationMs": 4228,
+      "evidence": [
+        "N-04-01-lang-persist.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-05",
+      "name": "导航菜单硬编码检查（中文态下菜单语言）",
+      "status": "pass",
+      "durationMs": 1258,
+      "evidence": [
+        "N-05-01-nav-hardcoded.png"
+      ],
+      "issues": [
+        {
+          "level": "warn",
+          "msg": "导航菜单为硬编码英文, 中文用户无法感知语言切换: \"HomePlaygroundShowcasePerfMCPLearnDocs 🌐 中文\""
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "N-06",
+      "name": "i18n 健康度巡检（缺 key / 消息内嵌 HTML，全页面 × 双语言）",
+      "status": "fail",
+      "durationMs": 28226,
+      "evidence": [
+        "N-06-01-i18n-sweep.png",
+        "N-06-02-zz-final-fullpage.png",
+        "N-06-events.json"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "缺失 key: 0 处; 消息内嵌 HTML 警告: 29 处"
+        },
+        {
+          "level": "fail",
+          "msg": "发现 29 处 i18n 消息内嵌 HTML(vue-i18n XSS 风险告警, 触发自 perf.intro/liveHint/method2、mcp.step2Hint 等 v-html 用法): [\n {\n  \"locale\": \"zh-CN\",\n  \"path\": \"/perf\",\n  \"sample\": \"[intlify] Detected HTML in '调 <code>/api/demo/compile</code> 跑 5000 次渲染对比。' message. Recommend not using HTML messages to avoid XSS.\"\n },\n {\n  \"locale\": \"zh-CN\",\n  \"path\": \"/perf\",\n  \"sample\": \"[intlify] Detected HTML in '简单模板:<code>\\\"Hello, `name`!\\\"</code>' message. Recommend not using HTML messages to avoid XSS.\"\n },\n {\n  \"locale\": \"zh-CN\",\n  \"path\": \"/mcp\",\n  \"sample\": \"[intlify] Detected HTML in '保存到 <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>:' message. Recommend not using \"\n },\n {\n  \"locale\": \"zh-CN\",\n  \"path\": \"/mcp\",\n  \"sample\": \"[intlify] Detected HTML in '这里走 demo 后端 <code>/api/demo/mcp</code>,模拟 stdio 流:' message. Recommend not using HTML messages to avoid XSS.\"\n }\n]"
+        }
+      ],
+      "info": [
+        "缺失 key: 0 处; 消息内嵌 HTML 警告: 29 处"
+      ]
+    },
+    {
+      "id": "N-07",
+      "name": "GitHub 外链可见可用",
+      "status": "fail",
+      "durationMs": 1520,
+      "evidence": [
+        "N-07-01-nav-github-corner.png",
+        "N-07-02-zz-final-fullpage.png",
+        "N-07-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "GitHub 外链存在但不可见(0x0), 被吞进隐藏容器: el-menu el-menu--popup el-menu--popup-bottom-start — App.vue 在 el-menu 内使用原生 <li>,被 Element Plus 解析为空 el-sub-menu,导航栏只显示一个「…」"
+        },
+        {
+          "level": "fail",
+          "msg": ".nav-gh 选择器未命中(链接不在预期位置)"
+        }
+      ],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 4,
+    "fail": 3
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "bl": "BL-10",
+  "name": "异常与容错",
+  "desc": "错误输入、边界输入、网络故障下的 UI 兜底与恢复能力",
+  "startedAt": "2026-09-20T07:29:59.565Z",
+  "finishedAt": "2026-09-20T07:30:37.176Z",
+  "cases": [
+    {
+      "id": "E-01",
+      "name": "模板脚本错误 → 错误面板且页面不崩",
+      "status": "pass",
+      "durationMs": 4071,
+      "evidence": [
+        "E-01-01-err-template.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-02",
+      "name": "非法 JSON 数据 → 行内提示不崩溃",
+      "status": "pass",
+      "durationMs": 2830,
+      "evidence": [
+        "E-02-01-err-bad-data.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-03",
+      "name": "空模板点击渲染行为",
+      "status": "pass",
+      "durationMs": 3666,
+      "evidence": [
+        "E-03-01-err-empty-template.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-04",
+      "name": "超限模板（>64KB）→ 服务端限制兜底",
+      "status": "pass",
+      "durationMs": 4231,
+      "evidence": [
+        "E-04-01-err-oversize.png"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "服务端返回: 400 / 错误面板=1"
+        }
+      ],
+      "info": [
+        "服务端返回: 400 / 错误面板=1"
+      ]
+    },
+    {
+      "id": "E-05",
+      "name": "断网（API 不可达）→ 错误反馈且可恢复",
+      "status": "pass",
+      "durationMs": 3749,
+      "evidence": [
+        "E-05-01-err-offline.png",
+        "E-05-02-err-offline-recovered.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-06",
+      "name": "Learn 未知 id 容错（错误视角）",
+      "status": "pass",
+      "durationMs": 1670,
+      "evidence": [
+        "E-06-01-err-learn-404.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-07",
+      "name": "全站 8 页巡检：零 pageerror / 零异常 4xx",
+      "status": "pass",
+      "durationMs": 14611,
+      "evidence": [
+        "E-07-01-sweep-last.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  }
+}

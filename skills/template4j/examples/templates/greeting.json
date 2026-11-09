@@ -1,0 +1,8 @@
+{
+  "greeting": "Hello, {@name}!",
+  "today": "{= new java.text.SimpleDateFormat('yyyy-MM-dd').format(new Date()) }",
+  "metadata": {
+    "name": "{@name}",
+    "level": "{= @level >= 10 ? 'vip' : 'normal' }"
+  }
+}

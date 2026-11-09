@@ -1,0 +1,63 @@
+{
+  "bl": "BL-06",
+  "name": "性能基准 Perf",
+  "desc": "基准对比条形图、图例、live benchmark 实测、方法论说明",
+  "startedAt": "2026-09-20T07:17:01.946Z",
+  "finishedAt": "2026-09-20T07:17:11.764Z",
+  "cases": [
+    {
+      "id": "F-01",
+      "name": "页面加载与静态基准图",
+      "status": "pass",
+      "durationMs": 1457,
+      "evidence": [
+        "F-01-01-perf-static.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "F-02",
+      "name": "Live benchmark 运行与提速可信度",
+      "status": "pass",
+      "durationMs": 1599,
+      "evidence": [
+        "F-02-01-perf-live.png"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "live 结果: [\"5000 次迭代\",\"bare render: 95 ms (avg 19107 ns)\",\"compiled render: 52 ms (avg 10452 ns)\",\"提速: 1.83x\"]"
+        }
+      ],
+      "info": [
+        "live 结果: [\"5000 次迭代\",\"bare render: 95 ms (avg 19107 ns)\",\"compiled render: 52 ms (avg 10452 ns)\",\"提速: 1.83x\"]"
+      ]
+    },
+    {
+      "id": "F-03",
+      "name": "条形宽度与数值单调一致",
+      "status": "pass",
+      "durationMs": 1418,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "F-04",
+      "name": "方法论与英文文案",
+      "status": "pass",
+      "durationMs": 3016,
+      "evidence": [
+        "F-04-01-perf-en.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 4,
+    "fail": 0
+  }
+}

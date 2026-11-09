@@ -1,0 +1,103 @@
+[
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "api4xx",
+    "status": 400,
+    "text": "400 http://localhost:5173/api/try"
+  },
+  {
+    "type": "console.error",
+    "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[intlify] Detected HTML in '调 <code>/api/demo/compile</code> 跑 5000 次渲染对比。' message. Recommend not using HTML messages to avoid XSS."
+  },
+  {
+    "type": "console.warn",
+    "text": "[intlify] Detected HTML in '简单模板:<code>\"Hello, `name`!\"</code>' message. Recommend not using HTML messages to avoid XSS."
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[intlify] Detected HTML in '保存到 <code>~/Library/Application Support/Claude/claude_desktop_config.json</code>:' message. Recommend not using HTML messages to avoid XSS."
+  },
+  {
+    "type": "console.warn",
+    "text": "[intlify] Detected HTML in '这里走 demo 后端 <code>/api/demo/mcp</code>,模拟 stdio 流:' message. Recommend not using HTML messages to avoid XSS."
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  }
+]

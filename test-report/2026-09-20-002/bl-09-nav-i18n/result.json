@@ -1,0 +1,98 @@
+{
+  "bl": "BL-09",
+  "name": "全局导航与国际化",
+  "desc": "主导航全路由可达、未知路径兜底、中英文切换、语言持久化、i18n 缺失 key 巡检",
+  "startedAt": "2026-09-20T07:25:43.061Z",
+  "finishedAt": "2026-09-20T07:26:36.702Z",
+  "cases": [
+    {
+      "id": "N-01",
+      "name": "8 个主路由全部可达",
+      "status": "pass",
+      "durationMs": 10155,
+      "evidence": [
+        "N-01-01-routes-all-last.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-02",
+      "name": "未知路径兜底（404 页）",
+      "status": "pass",
+      "durationMs": 1513,
+      "evidence": [
+        "N-02-01-unknown-route.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-03",
+      "name": "中英切换即时生效",
+      "status": "pass",
+      "durationMs": 4668,
+      "evidence": [
+        "N-03-01-lang-en.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-04",
+      "name": "语言选择刷新持久化",
+      "status": "pass",
+      "durationMs": 4182,
+      "evidence": [
+        "N-04-01-lang-persist.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-05",
+      "name": "导航菜单硬编码检查（中文态下菜单语言）",
+      "status": "pass",
+      "durationMs": 1249,
+      "evidence": [
+        "N-05-01-nav-hardcoded.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "N-06",
+      "name": "i18n 健康度巡检（缺 key / 消息内嵌 HTML，全页面 × 双语言）",
+      "status": "pass",
+      "durationMs": 27984,
+      "evidence": [
+        "N-06-01-i18n-sweep.png"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "缺失 key: 0 处; 消息内嵌 HTML 警告: 0 处"
+        }
+      ],
+      "info": [
+        "缺失 key: 0 处; 消息内嵌 HTML 警告: 0 处"
+      ]
+    },
+    {
+      "id": "N-07",
+      "name": "GitHub 外链可见可用",
+      "status": "pass",
+      "durationMs": 1425,
+      "evidence": [
+        "N-07-01-nav-github-corner.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  }
+}

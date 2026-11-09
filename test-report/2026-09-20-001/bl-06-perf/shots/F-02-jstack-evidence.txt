@@ -1,0 +1,43 @@
+"http-nio-8088-exec-3" #46 [43523] daemon prio=5 os_prio=31 cpu=234908.73ms elapsed=4118.79s tid=0x0000000b7cbd2a00 nid=43523 runnable  [0x000000017435f000]
+   java.lang.Thread.State: RUNNABLE
+	at java.util.HashMap.putVal(java.base@21.0.11/HashMap.java:635)
+	at java.util.HashMap.put(java.base@21.0.11/HashMap.java:618)
+	at fun.commons.template4j.site.controller.StreamController.lambda$stream$0(StreamController.java:80)
+	at fun.commons.template4j.site.controller.StreamController$$Lambda/0x00000070018671c8.accept(Unknown Source)
+	at fun.commons.template4j.core.RenderStream.lambda$runRender$3(RenderStream.java:102)
+	at fun.commons.template4j.core.RenderStream$$Lambda/0x0000007001867a88.accept(Unknown Source)
+	at fun.commons.template4j.core.JsonRenderer.trace(JsonRenderer.java:170)
+	at fun.commons.template4j.core.ExpressionEvaluator.evaluate(ExpressionEvaluator.java:68)
+	at fun.commons.template4j.core.JsonRenderer.renderString(JsonRenderer.java:252)
+	at fun.commons.template4j.core.JsonRenderer.convertSelf(JsonRenderer.java:216)
+	at fun.commons.template4j.core.JsonRenderer.renderMap(JsonRenderer.java:321)
+	at fun.commons.template4j.core.JsonRenderer.convertSelf(JsonRenderer.java:219)
+	at fun.commons.template4j.core.JsonRenderer.render(JsonRenderer.java:177)
+	at fun.commons.template4j.core.JsonRenderer$CompiledTemplate.render(JsonRenderer.java:204)
+	at fun.commons.template4j.site.controller.CompileController.demo(CompileController.java:49)
+	at java.lang.invoke.LambdaForm$DMH/0x0000007001228800.invokeVirtual(java.base@21.0.11/LambdaForm$DMH)
+	at java.lang.invoke.LambdaForm$MH/0x000000700119d000.invoke(java.base@21.0.11/LambdaForm$MH)
+	at java.lang.invoke.Invokers$Holder.invokeExact_MT(java.base@21.0.11/Invokers$Holder)
+	at jdk.internal.reflect.DirectMethodHandleAccessor.invokeImpl(java.base@21.0.11/DirectMethodHandleAccessor.java:154)
+	at jdk.internal.reflect.DirectMethodHandleAccessor.invoke(java.base@21.0.11/DirectMethodHandleAccessor.java:103)
+	at java.lang.reflect.Method.invoke(java.base@21.0.11/Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:257)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:190)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+
+== 污染对照数据（同一台机器, 5000 iterations, GET /api/demo/compile）==
+干净后端:          bare avg 77,570 ns   | compiled avg 19,012 ns    | 提速 4.08x  ✓
+BL-02(Playground Trace)之后: bare avg 654,131 ns | compiled avg 917,464 ns | 提速 0.71x ✗ (劣化 ~8.4x)
+历史复现:          0.76x ✗ / 0.78x ✗ ; 持续压测后 /api/demo/compile 挂起 >4min,
+                   http-nio-8088-exec-3 单线程累计 CPU 235s, 栈顶停在
+                   StreamController.lambda$stream$0 → HashMap.putVal (SSE trace 写入)
+
+== 结论 ==
+StreamController 的 SSE trace 订阅者在连接结束后未从共享 RenderEngine 反注册,
+后续任意请求(含 /api/demo/compile 的 5000 次循环)的 trace 事件继续写入已断开的
+SSE 连接, 造成: (1) 跨请求性能污染, Perf 页 live benchmark 结果失真甚至倒挂;
+(2) 无界事件累积与线程 CPU 烧穿, 长时间运行的站点会整体劣化。

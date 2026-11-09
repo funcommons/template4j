@@ -1,0 +1,101 @@
+{
+  "bl": "BL-05",
+  "name": "在线试用 Try",
+  "desc": "快速试用页：JSON/YAML 双类型渲染、结果与耗时、历史记录恢复、清空",
+  "startedAt": "2026-09-20T08:24:08.740Z",
+  "finishedAt": "2026-09-20T08:24:28.143Z",
+  "cases": [
+    {
+      "id": "T-01",
+      "name": "页面加载与控件齐全",
+      "status": "pass",
+      "durationMs": 1448,
+      "evidence": [
+        "T-01-01-try-default.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "T-02",
+      "name": "JSON 模板渲染与结果",
+      "status": "pass",
+      "durationMs": 1534,
+      "evidence": [
+        "T-02-01-try-render-json.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "T-03",
+      "name": "YAML 模板渲染",
+      "status": "pass",
+      "durationMs": 1515,
+      "evidence": [
+        "T-03-01-try-render-yaml.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "T-04",
+      "name": "数据非法 JSON 提示",
+      "status": "pass",
+      "durationMs": 2283,
+      "evidence": [
+        "T-04-01-try-bad-json.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "T-05",
+      "name": "模板渲染错误兜底展示",
+      "status": "pass",
+      "durationMs": 2964,
+      "evidence": [
+        "T-05-01-try-render-error.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "T-06",
+      "name": "历史记录生成与点击恢复",
+      "status": "pass",
+      "durationMs": 4215,
+      "evidence": [
+        "T-06-01-history-restore.png"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "历史条目: [\"16:24:23{\\\"h\\\":\\\"second\\\"}...\",\"16:24:22{\\\"h\\\":\\\"first\\\"}...\"]"
+        },
+        {
+          "level": "info",
+          "msg": "清空后历史条目: [\"16:24:23{\\\"h\\\":\\\"second\\\"}...\",\"16:24:22{\\\"h\\\":\\\"first\\\"}...\"]"
+        }
+      ],
+      "info": [
+        "历史条目: [\"16:24:23{\\\"h\\\":\\\"second\\\"}...\",\"16:24:22{\\\"h\\\":\\\"first\\\"}...\"]",
+        "清空后历史条目: [\"16:24:23{\\\"h\\\":\\\"second\\\"}...\",\"16:24:22{\\\"h\\\":\\\"first\\\"}...\"]"
+      ]
+    },
+    {
+      "id": "T-07",
+      "name": "清空操作",
+      "status": "pass",
+      "durationMs": 2728,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  }
+}

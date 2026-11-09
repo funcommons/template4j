@@ -1,0 +1,98 @@
+{
+  "bl": "BL-03",
+  "name": "精选示例 Showcase",
+  "desc": "示例卡片展示、展开/收起、live 运行（parallel / schema / mcp）、无端点卡片提示",
+  "startedAt": "2026-09-20T07:14:25.637Z",
+  "finishedAt": "2026-09-20T07:14:46.809Z",
+  "cases": [
+    {
+      "id": "S-01",
+      "name": "页面加载与 6 张卡片",
+      "status": "pass",
+      "durationMs": 1655,
+      "evidence": [
+        "S-01-01-showcase-default.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-02",
+      "name": "卡片展开/收起与互斥",
+      "status": "pass",
+      "durationMs": 2862,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-03",
+      "name": "卡片1 Parallel Demo 运行",
+      "status": "pass",
+      "durationMs": 2051,
+      "evidence": [
+        "S-03-01-card1-parallel.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-04",
+      "name": "卡片2 BFF User Profile 运行",
+      "status": "pass",
+      "durationMs": 2451,
+      "evidence": [
+        "S-04-01-card2-bff.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-05",
+      "name": "卡片5 Schema Guard 运行",
+      "status": "pass",
+      "durationMs": 2468,
+      "evidence": [
+        "S-05-01-card5-schema.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-06",
+      "name": "卡片6 MCP over HTTP 运行",
+      "status": "pass",
+      "durationMs": 2464,
+      "evidence": [
+        "S-06-01-card6-mcp.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-07",
+      "name": "卡片3/4 无端点提示",
+      "status": "pass",
+      "durationMs": 3081,
+      "evidence": [
+        "S-07-01-cards-no-endpoint.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "S-08",
+      "name": "卡片标签与描述完整",
+      "status": "pass",
+      "durationMs": 1573,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "pass": 8,
+    "fail": 0
+  }
+}

@@ -81,7 +81,7 @@ public class MyRenderer implements RenderComponent {
 
 注册：在 `ComponentRegistry.registerAllDefaults` 加 `register(new MyRenderer())`。
 
-文档：在 `manual/06-components.md` 加章节，至少包含 schema 表 + 2 个例子。
+文档：在 `manual/zh-CN/06-components.md` 加章节，至少包含 schema 表 + 2 个例子。
 
 测试：见 `ParallelRendererTest` / `RestRendererServerTest` 风格。
 

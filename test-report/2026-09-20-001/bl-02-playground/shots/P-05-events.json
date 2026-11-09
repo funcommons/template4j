@@ -1,0 +1,27 @@
+[
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "api4xx",
+    "status": 400,
+    "text": "400 http://localhost:5173/api/try"
+  },
+  {
+    "type": "console.error",
+    "text": "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  },
+  {
+    "type": "console.warn",
+    "text": "[Vue warn]: Failed to resolve component: i-ep-arrow-down\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <App>"
+  }
+]

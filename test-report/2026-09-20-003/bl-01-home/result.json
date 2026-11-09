@@ -1,0 +1,90 @@
+{
+  "bl": "BL-01",
+  "name": "门户与首页",
+  "desc": "官网首页：hero 区、示例演示 tab、CTA、功能卡片、依赖坐标复制、统计数字",
+  "startedAt": "2026-09-20T08:15:20.263Z",
+  "finishedAt": "2026-09-20T08:15:39.871Z",
+  "cases": [
+    {
+      "id": "H-01",
+      "name": "首页加载整体渲染",
+      "status": "pass",
+      "durationMs": 2209,
+      "evidence": [
+        "H-01-01-home-full.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-02",
+      "name": "Hero 示例 Tab 切换联动",
+      "status": "pass",
+      "durationMs": 4039,
+      "evidence": [
+        "H-02-01-tab-initial.png",
+        "H-02-02-tab-switched.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-03",
+      "name": "CTA 跳转 Playground",
+      "status": "pass",
+      "durationMs": 2673,
+      "evidence": [
+        "H-03-01-cta-playground.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-04",
+      "name": "CTA 跳转 Learn",
+      "status": "pass",
+      "durationMs": 1529,
+      "evidence": [
+        "H-04-01-cta-learn.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-05",
+      "name": "Maven 依赖坐标复制",
+      "status": "pass",
+      "durationMs": 1849,
+      "evidence": [
+        "H-05-01-copy-deps.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-06",
+      "name": "统计数字与 MCP 提示区",
+      "status": "pass",
+      "durationMs": 1434,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "H-07",
+      "name": "Hero 门面演示开箱可渲染",
+      "status": "pass",
+      "durationMs": 2650,
+      "evidence": [
+        "H-07-01-hero-demo-output.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 7,
+    "fail": 0
+  }
+}

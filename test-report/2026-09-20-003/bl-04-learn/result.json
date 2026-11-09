@@ -1,0 +1,127 @@
+{
+  "bl": "BL-04",
+  "name": "学习中心 Learn",
+  "desc": "示例导航、搜索、详情交互（运行/变量/复制/翻页）、404、全部示例遍历回归",
+  "startedAt": "2026-09-20T08:22:39.055Z",
+  "finishedAt": "2026-09-20T08:24:08.536Z",
+  "cases": [
+    {
+      "id": "L-01",
+      "name": "列表加载：分类侧栏与示例数量",
+      "status": "pass",
+      "durationMs": 1935,
+      "evidence": [
+        "L-01-01-learn-list.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-02",
+      "name": "搜索过滤",
+      "status": "pass",
+      "durationMs": 3159,
+      "evidence": [
+        "L-02-01-search-if.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-03",
+      "name": "默认详情加载（首个示例）",
+      "status": "pass",
+      "durationMs": 1854,
+      "evidence": [
+        "L-03-01-detail-default.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-04",
+      "name": "直达详情与上一个/下一个翻页",
+      "status": "pass",
+      "durationMs": 3492,
+      "evidence": [
+        "L-04-01-prev-next-nav.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-05",
+      "name": "运行可执行示例",
+      "status": "pass",
+      "durationMs": 33161,
+      "evidence": [
+        "L-05-01-run-quickstart.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-06",
+      "name": "修改变量后重新运行",
+      "status": "pass",
+      "durationMs": 3200,
+      "evidence": [
+        "L-06-01-var-edit-run.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-07",
+      "name": "复制按钮",
+      "status": "pass",
+      "durationMs": 1911,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-08",
+      "name": "未知示例 id → 404 提示页",
+      "status": "pass",
+      "durationMs": 2685,
+      "evidence": [
+        "L-08-01-not-found.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "L-09",
+      "name": "全量遍历 36 个示例详情（零报错）",
+      "status": "pass",
+      "durationMs": 32920,
+      "evidence": [
+        "L-09-01-traverse-last.png"
+      ],
+      "issues": [
+        {
+          "level": "info",
+          "msg": "共 36 个示例"
+        }
+      ],
+      "info": [
+        "共 36 个示例"
+      ]
+    },
+    {
+      "id": "L-10",
+      "name": "侧栏分类展开与收起",
+      "status": "pass",
+      "durationMs": 2716,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "pass": 10,
+    "fail": 0
+  }
+}

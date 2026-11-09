@@ -1,0 +1,239 @@
+{
+  "bl": "BL-02",
+  "name": "模板演练场 Playground",
+  "desc": "核心交互演练场：预设加载、JSON/YAML/String、手动渲染、快捷键、片段、格式化、分享、Trace、错误、持久化、文件加载",
+  "startedAt": "2026-09-20T05:26:15.174Z",
+  "finishedAt": "2026-09-20T05:27:38.120Z",
+  "cases": [
+    {
+      "id": "P-01",
+      "name": "加载与默认预设自动渲染",
+      "status": "fail",
+      "durationMs": 3200,
+      "evidence": [
+        "P-01-01-default-render.png",
+        "P-01-02-zz-final-fullpage.png",
+        "P-01-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "结果面板应显示格式化 JSON 树而非转义字符串(疑似双重序列化), got: \"{\\n  \\\"msg\\\": \\\"Hello, alice!\\\",\\n  \\\"age\\\": 30\\n}\""
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "P-02",
+      "name": "四个预设逐一加载渲染",
+      "status": "fail",
+      "durationMs": 17687,
+      "evidence": [
+        "P-02-01-last-preset.png",
+        "P-02-02-zz-final-fullpage.png",
+        "P-02-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "预设「Parallel mock」渲染出现错误面板: template path:/@class:parallel component render error : template path:/@class:parallel task 'user' failed : template path:/parallel/@class:rest component render"
+        },
+        {
+          "level": "fail",
+          "msg": "Parallel mock 输出应包含 u-1, got: {\"doubled\":84,\"tier\":\"normal\"}"
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "P-03",
+      "name": "模板类型 JSON/YAML/String 切换",
+      "status": "pass",
+      "durationMs": 3101,
+      "evidence": [
+        "P-03-01-type-string.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-04",
+      "name": "手动编辑模板并点击渲染",
+      "status": "pass",
+      "durationMs": 2699,
+      "evidence": [
+        "P-04-01-manual-render.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-05",
+      "name": "Ctrl+Enter 快捷键渲染",
+      "status": "fail",
+      "durationMs": 12428,
+      "evidence": [
+        "P-05-01-zz-final-fullpage.png",
+        "P-05-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "Ctrl+Enter 应触发渲染 (2 → 2)"
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "P-06",
+      "name": "代码片段插入",
+      "status": "pass",
+      "durationMs": 2549,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-07",
+      "name": "格式化 JSON 数据",
+      "status": "pass",
+      "durationMs": 2866,
+      "evidence": [
+        "P-07-01-formatted.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-08",
+      "name": "清空按钮",
+      "status": "pass",
+      "durationMs": 2949,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-09",
+      "name": "分享链接生成与状态回填",
+      "status": "fail",
+      "durationMs": 4950,
+      "evidence": [
+        "P-09-01-share-clicked.png",
+        "P-09-02-share-restore.png",
+        "P-09-03-zz-final-fullpage.png",
+        "P-09-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "分享链接应以 http://localhost:5173/playground?state= 开头, got: http://localhost:5173/playgroundplayground?state=eyJ0Ijoie1xuICBcInNoYXJlXCI6IFwibWFya2VyLTkxOVwiXG59IiwiZCI6InsgXCJuYW1lXCI6IFwiYWxpY2VcIiwgXCJhZ2VcIjogMzAgfSIsInkiOiJqc29uIn0="
+        },
+        {
+          "level": "info",
+          "msg": "实际生成: http://localhost:5173/playgroundplayground?state=eyJ0Ijoie1xuICBcInNoYXJlXCI6IFwibWFya2VyLTkxOVwiXG59IiwiZCI6InsgXCJuYW1lXCI6IFwiYWxpY2VcIiwgXCJhZ2VcIjogMzAgfSIsInkiOiJqc29uIn0="
+        }
+      ],
+      "info": [
+        "实际生成: http://localhost:5173/playgroundplayground?state=eyJ0Ijoie1xuICBcInNoYXJlXCI6IFwibWFya2VyLTkxOVwiXG59IiwiZCI6InsgXCJuYW1lXCI6IFwiYWxpY2VcIiwgXCJhZ2VcIjogMzAgfSIsInkiOiJqc29uIn0="
+      ]
+    },
+    {
+      "id": "P-10",
+      "name": "Trace 开关与事件面板",
+      "status": "pass",
+      "durationMs": 4351,
+      "evidence": [
+        "P-10-01-trace-events.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-11",
+      "name": "Raw 原始输出 Tab",
+      "status": "fail",
+      "durationMs": 3407,
+      "evidence": [
+        "P-11-01-zz-final-fullpage.png",
+        "P-11-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "Raw 输出应为单行 JSON, got: \"{\\n  \\\"msg\\\": \\\"Hello, alice!\\\",\\n  \\\"age\\\": 30\\n}\""
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "P-12",
+      "name": "脚本错误 → 友好错误面板",
+      "status": "pass",
+      "durationMs": 3646,
+      "evidence": [
+        "P-12-01-render-error.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-13",
+      "name": "数据 JSON 非法提示",
+      "status": "pass",
+      "durationMs": 2738,
+      "evidence": [
+        "P-13-01-invalid-data.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-14",
+      "name": "Ctrl+S 保存与刷新持久化",
+      "status": "pass",
+      "durationMs": 5091,
+      "evidence": [
+        "P-14-01-persisted-after-reload.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-15",
+      "name": "YAML 模板渲染",
+      "status": "pass",
+      "durationMs": 2601,
+      "evidence": [
+        "P-15-01-yaml-render.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-16",
+      "name": "加载 JSON 文件到数据面板",
+      "status": "pass",
+      "durationMs": 2937,
+      "evidence": [
+        "P-16-01-file-loaded.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "P-17",
+      "name": "三栏布局无横向溢出",
+      "status": "pass",
+      "durationMs": 2595,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 17,
+    "pass": 12,
+    "fail": 5
+  }
+}

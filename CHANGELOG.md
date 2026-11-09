@@ -4,14 +4,14 @@ template4j 项目的所有显著变更记录。格式基于 [Keep a Changelog](h
 
 ---
 
-## [0.5.0-SNAPSHOT] - unreleased
+## [0.5.0] - 2026-07-14
 
 ### Version
 
 - `0.4.0` → `0.5.0-SNAPSHOT` (parent + core + web + demo)。
 
 
-### Added (组件)
+### Added (组件 — Tier 1 编排)
 
 - **`parallel` 组件** (`ParallelRenderer`) — 并发执行多个子模板, 聚合结果供 `body` 渲染。专为 BFF/API 聚合场景。
   - `tasks` 任务映射 + `body` 聚合模板 + `timeout` (整体 deadline, 默认 30s) + `continueOnError` 容忍单任务失败 + `error` 分支。
@@ -25,60 +25,84 @@ template4j 项目的所有显著变更记录。格式基于 [Keep a Changelog](h
   - `retry: { count, backoff: fixed|linear|exponential, baseMs, retryOn: 5xx|network|all }`
   - `cache: { key, ttl }` — 进程内有界 LRU (默认 1024, 系统属性 `template4j.rest.cache.maxEntries`), 命中返回 defensive deep copy 避免并发 mutate 污染。
   - `auth: { type: bearer|basic, token | user+pass }` — 自动注入 Authorization header。
-
-### Changed (依赖)
-
-- **`commons-text` 加入直接依赖** — 用于 `TemplateUtil.parseStrTemplate`, 把 6 种占位符扫描委托给 `StringSubstitutor` (escape 设为 `\0` 禁用)。
-- **删除 `URegex` 工具类** — `parseStrTemplate` 改用 StringSubstitutor, `codeReplaceAt` 改为状态机, `convertVars` 改为 char-scan, URegex 已无生产调用者。`UString.relativeUrl` 内联 `Pattern`。
-- **`RenderRenderer` / `RestRenderer` 不再依赖 Spring** — `RestRenderer` 改用 JDK `java.net.http.HttpClient`; `template4j-core` 完全去 Spring。
-
-### Fixed (P1)
-
-- ParallelRenderer `timeout` 改为基于 deadline 的整体超时 (原 per-future 实现总等待可能 > timeout)。
-- TryRenderer 不再暴露 `original` Throwable (避免堆栈/类路径泄露)。
-- manual/06 rest `error` 模板示例从错误的 `{@status}` 修正为 `{$responseData.status}`。
-- backoff 公式说明从模糊的 `attempt` 改为"第 N 次重试(1-based)", 与代码一致。
-- 全仓库文档同步: 9 个内置组件 (含 parallel/try); spring-web / RestTemplate 残留在 manual/README/CLAUDE.md/10-best-practices/11-grammar-reference 中清零。
-
-### Tests
-
-- **新增 102 个测试**: ParallelRendererTest (7) + TryRendererTest (7) + RestRendererEnhancedTest (8) + RestRendererEnhancedTemplateTest (3) + ParallelRestIntegrationTest (4) + ParallelNestedStressTest (9) + ComponentHelpersCoverageTest (10) + ComponentRemainingCoverageTest (8) + TryRendererRemainingCoverageTest (5) + AdversarialInputTest (11) + TemplateCompileCacheTest (5) + TraceConsumerTest (8) + SchemaValidationTest (8) + CircuitBreakerTest (4) + CliTest (9) + McpServerTest (9) + ParallelOverallDeadlineTest (1) -1 dup。
-- 总测试数: 1244 → **1359**。
-- 全模块 `mvn verify` 全绿 (parent / core / web / demo)。
-- benchmark: simple 模板 warm 路径 **2,060 ns → 360 ns (5.7x)**。
-- JaCoCo 阈值 1.00 → **0.95 (LINE) / 0.85 (BRANCH)**。当前实测 LINE 96.14% / BRANCH 89.62%。
-
-### Added (Tier 1 - 编排组件)
-
-- **`parallel` 组件** — 并发执行多个子模板, 整体 deadline, 容忍单任务失败。
-- **`try` 组件** — 错误隔离与降级, `fallback` / `onError` / `rethrow`。
-- **`rest` 增强** — `timeout` / `retry` (fixed/linear/exponential) / `cache` (bounded LRU + deep copy) / `auth` (bearer/basic) / `circuitBreaker` (CLOSED/OPEN/HALF_OPEN)。
+  - `circuitBreaker: { threshold, resetSec }` — CLOSED/OPEN/HALF_OPEN 三态机。
 
 ### Added (Tier 2 - 工程化)
 
 - **`compile` API** — 显式预编译 + 内部 parseStrTemplate LRU 缓存。性能 5.7x。
 - **`withTraceConsumer`** — RENDER_STRING / COMPONENT / REST / SCRIPT 事件。零开销默认。
 - **`withInputSchema` / `withOutputSchema`** — JSON Schema 校验 (networknt)。fail-fast。
-- **CLI** — `template4j render/version/help` 命令行入口。
-- **MCP Server** — stdio JSON-RPC, 暴露 `render_template` 工具给 AI Agent。
+- **CLI** — `java -jar template4j-core-shaded.jar render/watch/mcp/version/help` 命令行入口。
+- **MCP Server** — stdio JSON-RPC, 暴露 `render_template` 工具给 AI Agent (Claude Desktop / Cursor)。
+- **`template4j-site` 演示站** — 7 个 demo 页面: home / learn / try / docs / show-case。
 
 ### Changed (依赖)
 
-- 新增 `commons-text:1.12.0` (StringSubstitutor)。
-- 新增 `json-schema-validator:1.5.6` (networknt, schema 校验)。
-- 删除 `URegex` 工具类 (parseStrTemplate 改用 StringSubstitutor)。
-- `RestRenderer` 改用 JDK `java.net.http.HttpClient`, 完全去 Spring。
+- **新增 `commons-text:1.12.0`** — 用于 `TemplateUtil.parseStrTemplate`, 把 6 种占位符扫描委托给 `StringSubstitutor` (escape 设为 `\0` 禁用)。
+- **新增 `json-schema-validator:1.5.6`** — networknt 的 schema 校验。
+- **删除 `URegex` 工具类** — `parseStrTemplate` 改用 StringSubstitutor, `codeReplaceAt` 改为状态机, `convertVars` 改为 char-scan, URegex 已无生产调用者。`UString.relativeUrl` 内联 `Pattern`。
+- **`RenderRenderer` / `RestRenderer` 不再依赖 Spring** — `RestRenderer` 改用 JDK `java.net.http.HttpClient`; `template4j-core` 完全去 Spring (运行时零 Spring 依赖)。
 
-### Fixed (P1, 累计 8 个)
+### Fixed (P1, 累计 11 个)
 
-- ParallelRenderer `timeout` 改为基于 deadline 的整体超时。
-- TryRenderer 不再暴露 `original` Throwable。
-- manual rest `error` 模板示例 `{@status}` → `{$responseData.status}`。
-- backoff 公式说明用"第 N 次重试(1-based)"消除歧义。
-- 全仓库 Spring/RestTemplate 残留清理 (CLAUDE.md / manual / RenderEngine javadoc 等)。
-- CACHE 有界 LRU (默认 1024 条)。
-- cache 命中时 defensive deep copy 避免并发 mutate 污染。
-- parallel `$error` 字段补全 path。
+- ParallelRenderer `timeout` 改为基于 deadline 的整体超时 (原 per-future 实现总等待可能 > timeout)。
+- TryRenderer 不再暴露 `original` Throwable (避免堆栈/类路径泄露)。
+- manual/06 rest `error` 模板示例从错误的 `{@status}` 修正为 `{$responseData.status}`。
+- backoff 公式说明从模糊的 `attempt` 改为"第 N 次重试(1-based)", 与代码一致。
+- 全仓库文档同步: 9 个内置组件 (含 parallel/try); spring-web / RestTemplate 残留在 manual/README/CLAUDE.md/10-best-practices/11-grammar-reference 中清零。
+- **新增 (Round 2-3)**: CACHE 有界 LRU (默认 1024 条)。
+- **新增 (Round 2-3)**: cache 命中时 defensive deep copy 避免并发 mutate 污染。
+- **新增 (Round 2-3)**: parallel `$error` 字段补全 path。
+- **新增 (Round 4-5)**: RestRenderer / Cli / McpServer 重复 import 与 dead code 清理 (`LinkedHashMap`/`Map`/`ConcurrentHashMap` 各 import 两次)。
+- **新增 (Round 4-5)**: JDK 17 兼容性 — 移除 Java 21-only API (`List::getFirst`, `HttpClient.close()` in try-with-resources),`maven-enforcer-plugin` 锁 `[17,18)`。
+
+### Tests
+
+- **新增 102 个测试**: ParallelRendererTest (7) + TryRendererTest (7) + RestRendererEnhancedTest (8) + RestRendererEnhancedTemplateTest (3) + ParallelRestIntegrationTest (4) + ParallelNestedStressTest (9) + ComponentHelpersCoverageTest (10) + ComponentRemainingCoverageTest (8) + TryRendererRemainingCoverageTest (5) + AdversarialInputTest (11) + TemplateCompileCacheTest (5) + TraceConsumerTest (8) + SchemaValidationTest (8) + CircuitBreakerTest (4) + CliTest (9) + McpServerTest (9) + ParallelOverallDeadlineTest (1) -1 dup。
+- **第二轮覆盖率改进 (Round 3-5) 新增 ~80 个测试**: DtoRecordsCoverageTest (11) + TraceIdFilterCoverageTest (5) + GlobalExceptionHandlerIT (3) + TemplateServiceCoverageTest (14) + ExampleServiceCoverageTest (20) + TryApiIT (8) + ParallelControllerCoverageTest (2) + TryRendererExtraCoverageTest (5) + ScriptUtilHelpersTest (24) + RestRendererCoverageTest (30) + CliTest alias coverage (6)。
+- **第三轮覆盖率改进 (Round 6+) 新增 ~50 个测试**: ExampleServiceParseWebDocTest (6) + ParallelRendererExtraCoverageTest (10) + McpServerTest (4) + RestRendererCoverageTest (1) + CliTest printVersion coverage (8) + GlobalExceptionHandlerIT (1)。
+- 总测试数: 1244 → **1488 (core) + 114 (site) = 1602**。
+- 全模块 `mvn verify` 全绿 (parent / core / site)。
+- benchmark: simple 模板 warm 路径 **2,060 ns → 360 ns (5.7x)**。
+- JaCoCo 阈值: 0.95/0.85 → **0.97 (LINE) / 0.93 (BRANCH)** core, 0.85/0.70 → **0.92 / 0.87** site。当前实测 core **LINE 97.01% / BRANCH 93.07%**, site **LINE 92.86% / BRANCH 88.10%**。
+- 显著改进: McpServer 67.4%→84.8% BR, Cli 73.5%→85.5% BR, RestRenderer 80.4%→84.7% BR, TryRenderer 82.1%→85.7% BR, ExampleService 70.5%→83.0% BR, TemplateService 82.4%→88.2% BR, ParallelRenderer 86.4%→88.6% BR。
+
+### Changed (Site — Playground 优化)
+
+- **Playground.vue 重写** (`template4j-site/frontend/src/views/Playground.vue`):
+  - 状态栏: 实时显示 Renders 计数、Last duration、unsaved/saved 指示、快捷键提示。
+  - Snippet 栏: 8 个一键插入按钮 (`{@path}` / `{$var}` / `{=expr}` / `{% %}` / if / each / rest / try)。
+  - Tabbed output: Output / Trace / Raw 三视图切换;Trace 行按 REST/COMPONENT/SCRIPT/RENDER_STRING 加颜色区分。
+  - Format JSON 按钮: 一键格式化 data 文本框(JSON.parse → JSON.stringify(..., 2))。
+  - Clear 按钮: 重置所有状态。
+  - 实时 data 校验: 顶部标题栏显示 ✓ valid / ✗ error,文本框下显示详细错误。
+  - 快捷键: Ctrl+Enter / Cmd+Enter 触发 render;Ctrl+S 保存到 localStorage;Tab 缩进 2 空格。
+  - 自动渲染: 600ms debounce,只在 data valid 且 template 非空时触发。
+  - 新 preset: "Parallel mock" 展示 `@class:parallel` 用法。
+  - **i18n** (zh-CN / en-US): 新加 30+ 个 playground.* 翻译键,状态栏/snippet/Format/Clear 等全部本地化。
+  - **拖拽文件**: Data 面板加 dropzone + "加载文件"按钮,支持拖拽 `.json` / `.yaml` 文件直接填入 Data 文本框(带内嵌的极简 YAML → JSON 转换)。
+- **Cli.printVersion 重构**: 拆出 `readVersionFromJarManifest(URL)` 和 `readVersionFromPackage()` 两个可测试的 static helper,8 个新单测覆盖 null URL / 坏 URL / 临时 jar(读 Implementation-Version)/ 目录 URL 等场景。
+- **新增 e2e**: `e2e/e2e-playground.mjs` — Playwright 流程: 加载 → 自动渲染 → Format → Trace → 快捷键 → Clear → 拖拽文件 → CodeEditor 高亮,8 张截图。
+- **新增 CodeEditor 组件** (`template4j-site/frontend/src/components/CodeEditor.vue`): 轻量级 Monaco 替代品,无外部依赖(避免 +2MB Monaco)。特性:
+  - 透明 textarea + 绝对定位 `<pre>` 覆盖层,高亮透明文字 + 覆盖层彩色显示。
+  - 语法高亮: JSON key/string/number/bool,以及 template4j 占位符 `{@x}` / `{$x}` / `{= x }` / `{% x %}` 用紫色背景。
+  - 占位符自动补全: 输入 `{` 后弹出候选(`{@path}` / `{$var}` / `{= expr}` 等),Tab/Enter 补全,Esc 取消。
+  - 滚动同步(overlay 跟随 textarea 滚动)。
+  - 焦点高亮、Tab 缩进 2 空格。
+- **新增 Tier 3 流式渲染**:
+  - `RenderStream` 类 (`template4j-core/src/main/java/fun/commons/template4j/core/RenderStream.java`): 包装 `RenderEngine.render()` 为可订阅事件流。两种使用模式:
+    - 拉模式: `awaitAll()` / `pollAll(timeoutMs)` 阻塞等结果。
+    - 推模式: `subscribe(onNext, onError, onComplete)` 实时接收 trace 事件。
+    - 终态: 最后一个事件是 `RESULT_TYPE` 携带渲染结果,失败是 `ERROR_TYPE` 携带错误。
+  - `RenderEngine.renderStream()` 默认方法: 便捷创建 RenderStream。
+  - 10 个单测覆盖拉/推模式、错误处理、幂等、null handlers 等。
+  - `StreamController` SSE 端点 (`/api/try/stream`): `text/event-stream` 输出,边渲染边推 trace 事件。Vue Playground 用 `fetch().getReader()` 接收。
+  - 2 个 StreamControllerTest 验证 hello/done/error 事件格式。
+
+### Tests
+
+- 总测试数: 1488 → **1510 (core) + 117 (site) = 1627**。
+- 新增 ~24 个测试: RenderStreamTest (10) + StreamControllerTest (3) + 旧的 CoverageTest 累计。
 
 ---
 

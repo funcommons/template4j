@@ -1,0 +1,58 @@
+{
+  "bl": "BL-07",
+  "name": "MCP 集成",
+  "desc": "MCP 接入三步引导、Claude 配置复制、tools/list 与 render_template 实测",
+  "startedAt": "2026-09-20T08:29:39.506Z",
+  "finishedAt": "2026-09-20T08:29:48.216Z",
+  "cases": [
+    {
+      "id": "M-01",
+      "name": "页面加载与三步引导",
+      "status": "pass",
+      "durationMs": 1477,
+      "evidence": [
+        "M-01-01-mcp-page.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "M-02",
+      "name": "复制 Claude 配置",
+      "status": "pass",
+      "durationMs": 1749,
+      "evidence": [
+        "M-02-01-mcp-copy-config.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "M-03",
+      "name": "tools/list 调用",
+      "status": "pass",
+      "durationMs": 1471,
+      "evidence": [
+        "M-03-01-mcp-tools-list.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "M-04",
+      "name": "render_template 调用",
+      "status": "pass",
+      "durationMs": 1484,
+      "evidence": [
+        "M-04-01-mcp-render-call.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 4,
+    "fail": 0
+  }
+}

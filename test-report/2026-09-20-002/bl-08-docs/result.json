@@ -1,0 +1,56 @@
+{
+  "bl": "BL-08",
+  "name": "文档中心 Docs",
+  "desc": "文档详情展示（markdown section、可运行 json-renderer section、Java 调用代码）与 Try 联动",
+  "startedAt": "2026-09-20T07:17:20.511Z",
+  "finishedAt": "2026-09-20T07:17:33.833Z",
+  "cases": [
+    {
+      "id": "D-01",
+      "name": "页面加载 intro-home",
+      "status": "pass",
+      "durationMs": 2157,
+      "evidence": [
+        "D-01-01-docs-load.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "D-02",
+      "name": "Markdown section 内容",
+      "status": "pass",
+      "durationMs": 2131,
+      "evidence": [],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "D-03",
+      "name": "可运行 section 与 Java 调用代码",
+      "status": "pass",
+      "durationMs": 3935,
+      "evidence": [
+        "D-03-01-docs-run-section.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "D-04",
+      "name": "Open in Try 联动跳转",
+      "status": "pass",
+      "durationMs": 2749,
+      "evidence": [
+        "D-04-01-docs-open-in-try.png"
+      ],
+      "issues": [],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "pass": 4,
+    "fail": 0
+  }
+}

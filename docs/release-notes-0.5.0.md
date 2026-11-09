@@ -1,6 +1,6 @@
 # Release Notes — 0.5.0
 
-**发布日期**: 2026-07-XX (release-prepare 时自动填)
+**发布日期**: 2026-07-14
 
 template4j 0.5.0 是**API 编排引擎**的关键里程碑。在保留 JSON/YAML 模板引擎核心的同时,新增了 BFF / API 聚合场景的全部生产要素。
 
@@ -46,12 +46,13 @@ template4j 0.5.0 是**API 编排引擎**的关键里程碑。在保留 JSON/YAML
 ### 4. CLI + MCP Server
 
 ```bash
-# CLI
-template4j render template.jt --data-file data.json
-template4j version
+# CLI (fat jar 单文件部署, ~16 MB, 入口 fun.commons.template4j.core.Cli)
+java -jar template4j-core-shaded.jar render template.jt --data-file data.json
+java -jar template4j-core-shaded.jar version
+java -jar template4j-core-shaded.jar watch --dir ./templates --port 8080
 
 # MCP Server (供 Claude Desktop / Cursor 调用)
-java -cp template4j-core.jar fun.commons.template4j.core.McpServer
+java -jar template4j-core-shaded.jar mcp
 ```
 
 ### 5. Spring 依赖完全移除
@@ -64,9 +65,10 @@ java -cp template4j-core.jar fun.commons.template4j.core.McpServer
 |---|---|---|
 | 内置组件 | 7 | **9** (新增 parallel / try) |
 | rest 子属性 | 3 (url/method/data) | **9** (+timeout/retry/cache/auth/circuitBreaker) |
-| 测试数 | 1244 | **1359** (+115) |
-| 覆盖率 LINE | 100% (small) | 96.14% (含 ~700 行新代码) |
-| JaCoCo 阈值 | 1.00/1.00 | 0.95/0.85 |
+| 测试数 | 1244 | **1563** (+319) |
+| 覆盖率 LINE | 100% (small) | 97.00% (含 ~700 行新代码) |
+| 覆盖率 BRANCH | 100% (small) | 92.77% |
+| JaCoCo 阈值 | 1.00/1.00 | 0.97/0.92 (core), 0.92/0.87 (site) |
 | 依赖 (compile) | 7 | 7 (替换 spring-web → commons-text + networknt) |
 | Manual 章节 | 11 | **13** (+CLI / MCP Server) |
 

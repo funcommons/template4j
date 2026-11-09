@@ -1,0 +1,24 @@
+{
+  "@class": "parallel",
+  "tasks": {
+    "user": {
+      "@class": "rest",
+      "url": "https://api.example.com/users/{@userId}",
+      "auth": { "type": "bearer", "token": "{@token}" }
+    },
+    "orders": {
+      "@class": "rest",
+      "url": "https://api.example.com/orders?userId={@userId}",
+      "cache": { "key": "orders:{@userId}", "ttl": 60000 }
+    }
+  },
+  "timeout": 3000,
+  "continueOnError": true,
+  "body": {
+    "userId":     "{$user.id}",
+    "userName":   "{$user.name}",
+    "vip":        "{$user.vip}",
+    "orderCount": "{= $orders == null ? 0 : $orders.size() }",
+    "totalSpent": "{= ($orders ?: []).sum { it.amount } as double }"
+  }
+}

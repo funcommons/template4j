@@ -1,0 +1,106 @@
+{
+  "bl": "BL-10",
+  "name": "异常与容错",
+  "desc": "错误输入、边界输入、网络故障下的 UI 兜底与恢复能力",
+  "startedAt": "2026-09-20T05:03:45.543Z",
+  "finishedAt": "2026-09-20T05:04:24.098Z",
+  "cases": [
+    {
+      "id": "E-01",
+      "name": "模板脚本错误 → 错误面板且页面不崩",
+      "status": "pass",
+      "durationMs": 4068,
+      "evidence": [
+        "E-01-01-err-template.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-02",
+      "name": "非法 JSON 数据 → 行内提示不崩溃",
+      "status": "pass",
+      "durationMs": 2914,
+      "evidence": [
+        "E-02-01-err-bad-data.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-03",
+      "name": "空模板点击渲染行为",
+      "status": "pass",
+      "durationMs": 3681,
+      "evidence": [
+        "E-03-01-err-empty-template.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-04",
+      "name": "超限模板（>64KB）→ 服务端限制兜底",
+      "status": "fail",
+      "durationMs": 4654,
+      "evidence": [
+        "E-04-01-err-oversize.png",
+        "E-04-02-zz-final-fullpage.png",
+        "E-04-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "70KB 模板未被拦截(文档限制 65536): 无 4xx、无错误面板。api4xx=[]"
+        }
+      ],
+      "info": []
+    },
+    {
+      "id": "E-05",
+      "name": "断网（API 不可达）→ 错误反馈且可恢复",
+      "status": "pass",
+      "durationMs": 3777,
+      "evidence": [
+        "E-05-01-err-offline.png",
+        "E-05-02-err-offline-recovered.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-06",
+      "name": "Learn 未知 id 容错（错误视角）",
+      "status": "pass",
+      "durationMs": 1719,
+      "evidence": [
+        "E-06-01-err-learn-404.png"
+      ],
+      "issues": [],
+      "info": []
+    },
+    {
+      "id": "E-07",
+      "name": "全站 8 页巡检：零 pageerror / 零异常 4xx",
+      "status": "fail",
+      "durationMs": 14716,
+      "evidence": [
+        "E-07-01-sweep-last.png",
+        "E-07-02-zz-final-fullpage.png",
+        "E-07-events.json"
+      ],
+      "issues": [
+        {
+          "level": "fail",
+          "msg": "巡检发现 1 个异常: [\n {\n  \"page\": \"/\",\n  \"type\": \"api4xx\",\n  \"text\": \"400 http://localhost:5173/api/try\"\n }\n]"
+        }
+      ],
+      "info": []
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "pass": 5,
+    "fail": 2
+  }
+}

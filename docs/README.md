@@ -28,7 +28,7 @@ String template = """
 Object result = engine.renderJson(template, Map.of("name", "小红", "age", 19));
 ```
 
-详见 [`manual/01-quick-start.md`](./manual/01-quick-start.md)。
+详见 [`manual/zh-CN/01-quick-start.md`](./manual/zh-CN/01-quick-start.md)。
 
 ## 模块
 
