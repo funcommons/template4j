@@ -150,9 +150,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: template4j-site/frontend/package-lock.json
 
+      # --registry 覆盖 lockfile 里的 npmmirror resolved URL (本地开发写入):
+      # 镜像故障时 CI 不陪葬 (2026-11-09 npmmirror DB 故障 → npm ci E500 实绩)。
       - name: Install frontend dependencies
         working-directory: template4j-site/frontend
-        run: npm ci
+        run: npm ci --registry=https://registry.npmjs.org
 
       - name: Run frontend unit tests (vitest run)
         working-directory: template4j-site/frontend
@@ -189,7 +191,7 @@ jobs:
       - name: Install & build frontend
         working-directory: template4j-site/frontend
         run: |
-          npm ci
+          npm ci --registry=https://registry.npmjs.org
           npm run build
 
       - name: Package site jar
