@@ -1,0 +1,231 @@
+{
+  "$schema": "template4j-manual-v1",
+  "version": "0.5.0",
+  "language": {
+    "default": "zh-CN",
+    "supported": ["zh-CN", "en-US"]
+  },
+  "chapters": [
+    {
+      "id": "01-quick-start",
+      "lines": 118,
+      "title": {
+        "zh-CN": "快速开始",
+        "en-US": "Quick Start"
+      },
+      "desc": {
+        "zh-CN": "5 分钟跑通第一个模板(依赖、引擎、渲染)",
+        "en-US": "Run your first template in 5 minutes (deps, engine, render)"
+      },
+      "path": {
+        "zh-CN": "zh-CN/01-quick-start.md",
+        "en-US": null
+      },
+      "tags": ["beginner", "setup", "first-render"]
+    },
+    {
+      "id": "02-syntax",
+      "lines": 214,
+      "title": {
+        "zh-CN": "语法基础",
+        "en-US": "Syntax Basics"
+      },
+      "desc": {
+        "zh-CN": "5 种占位符、键前缀/后缀、转义",
+        "en-US": "5 placeholder forms, key prefix/suffix, escaping"
+      },
+      "path": {
+        "zh-CN": "zh-CN/02-syntax.md",
+        "en-US": null
+      },
+      "tags": ["syntax", "placeholder", "jsonpath", "groovy"]
+    },
+    {
+      "id": "03-data-and-vars",
+      "lines": 163,
+      "title": {
+        "zh-CN": "数据与变量",
+        "en-US": "Data and Variables"
+      },
+      "desc": {
+        "zh-CN": "@ 数据、$/$$ 变量、@@ 局部数据、$enter{}/$return{}",
+        "en-US": "@ data, $/$$ vars, @@ local data, $enter{}/$return{}"
+      },
+      "path": {
+        "zh-CN": "zh-CN/03-data-and-vars.md",
+        "en-US": null
+      },
+      "tags": ["data", "vars", "scope"]
+    },
+    {
+      "id": "04-scripting",
+      "lines": 191,
+      "title": {
+        "zh-CN": "Groovy 脚本",
+        "en-US": "Groovy Scripting"
+      },
+      "desc": {
+        "zh-CN": "{% ... %} / {= ... }、@ 重写、内置 Func* 工具(data/vars/render/load/cast/fne)",
+        "en-US": "{% ... %} / {= ... }, @ rewrite, built-in Func* (data/vars/render/load/cast/fne)"
+      },
+      "path": {
+        "zh-CN": "zh-CN/04-scripting.md",
+        "en-US": null
+      },
+      "tags": ["groovy", "scripting", "func"]
+    },
+    {
+      "id": "05-functions",
+      "lines": 93,
+      "title": {
+        "zh-CN": "方法 $name()",
+        "en-US": "Methods $name()"
+      },
+      "desc": {
+        "zh-CN": "用户定义方法、_args、FuncObject、递归守卫",
+        "en-US": "User-defined methods, _args, FuncObject, recursion guard"
+      },
+      "path": {
+        "zh-CN": "zh-CN/05-functions.md",
+        "en-US": null
+      },
+      "tags": ["methods", "func", "recursion"]
+    },
+    {
+      "id": "06-components",
+      "lines": 443,
+      "title": {
+        "zh-CN": "内置组件",
+        "en-US": "Built-in Components"
+      },
+      "desc": {
+        "zh-CN": "if / each / switch / invoke / render / const / rest / parallel / try",
+        "en-US": "if / each / switch / invoke / render / const / rest / parallel / try"
+      },
+      "path": {
+        "zh-CN": "zh-CN/06-components.md",
+        "en-US": null
+      },
+      "tags": ["components", "if", "each", "rest", "parallel", "try"]
+    },
+    {
+      "id": "07-merge-and-include",
+      "lines": 155,
+      "title": {
+        "zh-CN": "合并与包含",
+        "en-US": "Merge and Include"
+      },
+      "desc": {
+        "zh-CN": "* 合并键、&include 模板嵌套",
+        "en-US": "* merge key, &include template nesting"
+      },
+      "path": {
+        "zh-CN": "zh-CN/07-merge-and-include.md",
+        "en-US": null
+      },
+      "tags": ["merge", "include", "composition"]
+    },
+    {
+      "id": "08-resource-loading",
+      "lines": 100,
+      "title": {
+        "zh-CN": "资源加载",
+        "en-US": "Resource Loading"
+      },
+      "desc": {
+        "zh-CN": "renderUrl / renderJsonUrl / renderYamlUrl、格式推断",
+        "en-US": "renderUrl / renderJsonUrl / renderYamlUrl, format inference"
+      },
+      "path": {
+        "zh-CN": "zh-CN/08-resource-loading.md",
+        "en-US": null
+      },
+      "tags": ["io", "url", "classpath"]
+    },
+    {
+      "id": "09-custom-component",
+      "lines": 152,
+      "title": {
+        "zh-CN": "自定义组件",
+        "en-US": "Custom Components"
+      },
+      "desc": {
+        "zh-CN": "实现 RenderComponent、engine.withComponent",
+        "en-US": "Implement RenderComponent, engine.withComponent"
+      },
+      "path": {
+        "zh-CN": "zh-CN/09-custom-component.md",
+        "en-US": null
+      },
+      "tags": ["extension", "custom", "plugin"]
+    },
+    {
+      "id": "10-best-practices",
+      "lines": 266,
+      "title": {
+        "zh-CN": "最佳实践",
+        "en-US": "Best Practices"
+      },
+      "desc": {
+        "zh-CN": "性能(预热/compile/缓存)、安全(可信模板)、可维护性",
+        "en-US": "Performance (warmup/compile/cache), security (trusted templates), maintainability"
+      },
+      "path": {
+        "zh-CN": "zh-CN/10-best-practices.md",
+        "en-US": null
+      },
+      "tags": ["performance", "security", "best-practices"]
+    },
+    {
+      "id": "11-grammar-reference",
+      "lines": 153,
+      "title": {
+        "zh-CN": "语法参考",
+        "en-US": "Grammar Reference"
+      },
+      "desc": {
+        "zh-CN": "全量语法表(占位符/键前缀/组件/工具)",
+        "en-US": "Full grammar table (placeholder/key prefix/component/utility)"
+      },
+      "path": {
+        "zh-CN": "zh-CN/11-grammar-reference.md",
+        "en-US": null
+      },
+      "tags": ["reference", "cheatsheet"]
+    },
+    {
+      "id": "12-cli",
+      "lines": 135,
+      "title": {
+        "zh-CN": "CLI",
+        "en-US": "CLI"
+      },
+      "desc": {
+        "zh-CN": "命令行工具:render / version / help",
+        "en-US": "Command-line tool: render / version / help"
+      },
+      "path": {
+        "zh-CN": "zh-CN/12-cli.md",
+        "en-US": null
+      },
+      "tags": ["cli", "command-line"]
+    },
+    {
+      "id": "13-mcp-server",
+      "lines": 80,
+      "title": {
+        "zh-CN": "MCP Server",
+        "en-US": "MCP Server"
+      },
+      "desc": {
+        "zh-CN": "MCP stdio JSON-RPC 服务,给 Claude Desktop / Cursor 接入",
+        "en-US": "MCP stdio JSON-RPC server for Claude Desktop / Cursor"
+      },
+      "path": {
+        "zh-CN": "zh-CN/13-mcp-server.md",
+        "en-US": null
+      },
+      "tags": ["mcp", "ai-agent", "claude-desktop"]
+    }
+  ]
+}
