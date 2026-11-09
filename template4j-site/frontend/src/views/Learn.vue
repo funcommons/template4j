@@ -561,7 +561,6 @@ async function copyText(text: string, key = '') {
   padding-right: 0.6em;
   user-select: none;
 }
-.code-block code:first-line::before { counter-increment: lineno; content: counter(lineno); }
 .code-error code { color: #f48771; }
 
 .not-found-card { max-width: 480px; margin: 60px auto; text-align: center; border-radius: 10px; }
