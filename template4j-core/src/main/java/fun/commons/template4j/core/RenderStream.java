@@ -102,19 +102,27 @@ public class RenderStream {
             events.add(ev);
             onNext.accept(ev);
         });
+        // 终态事件走与引擎各调用点相同的 traceEnabled 门。本方法的 handle 在 finally
+        // 才反注册, 构造 RESULT / ERROR 时门必为 true —— 事件流与守卫前一字不变;
+        // 非 Renderer 形态的第三方引擎实现回退为总是构造 (默认门开)。
+        RenderEngine.Renderer renderer = engine instanceof RenderEngine.Renderer r ? r : null;
         try {
             Object r = engine.render(template, data);
             result.set(r);
-            RenderEngine.TraceEvent done = RenderEngine.TraceEvent.of(
-                    RESULT_TYPE, "", "render complete", 0, r);
-            events.add(done);
-            onNext.accept(done);
+            if (renderer == null || renderer.traceEnabled()) {
+                RenderEngine.TraceEvent done = RenderEngine.TraceEvent.of(
+                        RESULT_TYPE, "", "render complete", 0, r);
+                events.add(done);
+                onNext.accept(done);
+            }
         } catch (Throwable t) {
             error.set(t);
-            RenderEngine.TraceEvent errEv = RenderEngine.TraceEvent.of(
-                    ERROR_TYPE, "", t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName(), 0, null);
-            events.add(errEv);
-            onNext.accept(errEv);
+            if (renderer == null || renderer.traceEnabled()) {
+                RenderEngine.TraceEvent errEv = RenderEngine.TraceEvent.of(
+                        ERROR_TYPE, "", t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName(), 0, null);
+                events.add(errEv);
+                onNext.accept(errEv);
+            }
             onErrorHandler.accept(t);
         } finally {
             handle.remove();

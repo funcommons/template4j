@@ -448,12 +448,16 @@ public class RestRenderer implements RenderComponent {
             }
         }
         } finally {
-            long durMs = (System.nanoTime() - httpStartNs) / 1_000_000;
-            int traceStatus = response != null ? response.statusCode() : -1;
-            context.renderer.trace(fun.commons.template4j.core.RenderEngine.TraceEvent.of(
-                    "REST", context.self.path(),
-                    methodUpper + " " + url + "  " + traceStatus,
-                    durMs, null));
+            // trace 门: 无 consumer 时跳过 durMs / traceStatus / 事件构造 (零分配);
+            // httpStartNs 计时保持无条件 —— circuit breaker 的 onSuccess/onError 依赖它。
+            if (context.renderer.traceEnabled()) {
+                long durMs = (System.nanoTime() - httpStartNs) / 1_000_000;
+                int traceStatus = response != null ? response.statusCode() : -1;
+                context.renderer.trace(fun.commons.template4j.core.RenderEngine.TraceEvent.of(
+                        "REST", context.self.path(),
+                        methodUpper + " " + url + "  " + traceStatus,
+                        durMs, null));
+            }
         }
 
         // ----- 处理结果 -----

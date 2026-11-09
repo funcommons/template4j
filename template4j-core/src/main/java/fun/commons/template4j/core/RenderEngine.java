@@ -31,6 +31,15 @@ public interface RenderEngine {
         TemplateLoader getTemplateLoader();
         /** 发出 trace 事件。无 consumer 时零开销 (内部检查)。 */
         void trace(TraceEvent event);
+        /**
+         * 当前是否已注册 trace 消费者。调用点据此在门为 false 时跳过
+         * {@code TraceEvent.of(...)} 事件对象构造 (零分配), 门为 true 时事件流不变。
+         *
+         * <p>默认返回 {@code true}: 第三方 Renderer 实现无需感知本方法, 行为与引入前
+         * 完全一致 (总是构造并发出事件); 内置 {@code JsonRenderer} 覆写为
+         * {@code !traceConsumers.isEmpty()} 的精确判断。
+         */
+        default boolean traceEnabled() { return true; }
     }
 
     /**
@@ -120,6 +129,16 @@ public interface RenderEngine {
      * 传 null 恢复内置默认池 (daemon FixedThreadPool, template4j.parallel.poolSize)。
      */
     RenderEngine withExecutor(ExecutorService executor);
+
+    /**
+     * 引擎脚本缓存可观测能力 (可选)。不支持时 scriptCacheSize() 返回 -1。
+     */
+    interface ScriptCacheStats {
+        /** 当前编译脚本缓存条目数 (估算, 已触发 cleanUp)。不支持时 -1。 */
+        default int scriptCacheSize() { return -1; }
+        /** 清空编译脚本缓存。不支持时空实现。 */
+        default void clearScriptCache() { }
+    }
 
     /**
      * 注入引擎级 rest 组件配置 (baseUrl / allowedHosts / maxResponseBytes), 仅影响本引擎的
@@ -281,6 +300,14 @@ public interface RenderEngine {
 
     default Object renderJson(String templateJson, Map<String,Object> data) throws RenderException{
         return  render(parseTemplateJson(templateJson),data);
+    }
+
+    /**
+     * 请求级渲染的 JSON 字符串模板便利重载:
+     * 等价 {@code render(parseTemplateJson(templateJson), data, options)}。
+     */
+    default Object renderJson(String templateJson, Map<String,Object> data, RenderOptions options) throws RenderException{
+        return render(parseTemplateJson(templateJson), data, options);
     }
 
     default Object renderJson(String templateJson, String data) throws RenderException{

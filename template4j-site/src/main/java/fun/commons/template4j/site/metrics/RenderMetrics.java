@@ -1,5 +1,6 @@
 package fun.commons.template4j.site.metrics;
 
+import fun.commons.template4j.core.RenderEngine;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -16,7 +17,8 @@ import java.util.concurrent.TimeUnit;
  * <ul>
  *   <li>{@code template4j.render.total{type}} — counter bumped per successful render</li>
  *   <li>{@code template4j.render.duration} — timer recording each render's duration</li>
- *   <li>{@code template4j.script.cache.size} — gauge, registered at startup</li>
+ *   <li>{@code template4j.script.cache.size} — gauge reading the engine's live script-cache size
+ *       via {@link RenderEngine.ScriptCacheStats#scriptCacheSize()} (reports -1 when unsupported)</li>
  * </ul>
  */
 @Component
@@ -30,14 +32,15 @@ public class RenderMetrics {
     private final Timer durationTimer;
     private final Map<String, Counter> totalByType = new ConcurrentHashMap<>();
 
-    public RenderMetrics(MeterRegistry registry) {
+    public RenderMetrics(MeterRegistry registry, RenderEngine.ScriptCacheStats scriptCacheStats) {
         this.registry = registry;
         this.durationTimer = registry.timer(DURATION);
-        // ScriptEnvironment (and its scriptCacheSize()) is package-private inside template4j-core,
-        // so site code cannot read the live cache size. Register a constant gauge for now so the
-        // series exists from startup; TODO(T2): wire the real scriptCacheSize() value once core
-        // exposes it (e.g. via an injected Supplier<Number> assembled where core types are visible).
-        Gauge.builder(SCRIPT_CACHE_SIZE, () -> 0).register(registry);
+        // Truth source (round2 §A3): the gauge reads the engine's scriptCacheSize() on every
+        // query, so the series moves as scripts are compiled / evicted / cleared. The builder
+        // keeps a strong reference to scriptCacheStats — fine here, the engine is a singleton
+        // that lives for the life of the app. Unsupported engines report -1 (interface default).
+        Gauge.builder(SCRIPT_CACHE_SIZE, scriptCacheStats, RenderEngine.ScriptCacheStats::scriptCacheSize)
+                .register(registry);
     }
 
     /** Records one successful render of the given template type taking {@code durationMs}. */

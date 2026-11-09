@@ -61,9 +61,12 @@ final class ExpressionEvaluator {
             }
             script = ScriptUtil.codeReplaceAt(script);
 
-            long t0 = isScriptExpr ? System.nanoTime() : 0L;
+            // 脚本计时门: 门为 false 时不取 t0、不构造事件 (零分配); 门在 eval 前判定一次,
+            // 保证 durMs 与事件要么都发要么都不发。
+            boolean traceScript = isScriptExpr && renderer != null && renderer.traceEnabled();
+            long t0 = traceScript ? System.nanoTime() : 0L;
             Object result = scripts.eval(script, self);
-            if (isScriptExpr && renderer != null) {
+            if (traceScript) {
                 long durMs = (System.nanoTime() - t0) / 1_000_000;
                 renderer.trace(RenderEngine.TraceEvent.of("SCRIPT", self.path(),
                         expression, durMs, result));

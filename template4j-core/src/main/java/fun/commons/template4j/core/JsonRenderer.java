@@ -15,6 +15,7 @@ import fun.commons.template4j.utils.UJson;
 import fun.commons.template4j.utils.UString;
 import lombok.NonNull;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,12 +26,14 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
+public class JsonRenderer implements RenderEngine, RenderEngine.Renderer, RenderEngine.ScriptCacheStats {
 
     private final ComponentRegistry components = new ComponentRegistry();
     private final ScriptEnvironment scripts = new ScriptEnvironment();
@@ -144,6 +147,17 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
         return this;
     }
 
+    /** {@link RenderEngine.ScriptCacheStats} 真值实现: 委托本引擎的 ScriptEnvironment 编译脚本缓存。 */
+    @Override
+    public int scriptCacheSize() {
+        return scripts.scriptCacheSize();
+    }
+
+    @Override
+    public void clearScriptCache() {
+        scripts.clearScriptCache();
+    }
+
     @Override
     public RenderEngine withExecutor(ExecutorService executor) {
         this.injectedExecutor = executor;
@@ -221,6 +235,14 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
     }
 
     @Override
+    public boolean traceEnabled() {
+        // 精确判断: CopyOnWriteArrayList.isEmpty() 零成本。调用点先判此门再构造
+        // TraceEvent.of(...), 无 consumer 时事件对象一个都不分配 (trace() 内部的
+        // isEmpty 兜底保留, 语义不变)。
+        return !traceConsumers.isEmpty();
+    }
+
+    @Override
     public Object render(Object template, Map<String, Object> data) throws RenderException {
         validate(inputSchema, data, "input", "/");
         Object result = convertSelf(template, new SelfObject(this, data));
@@ -240,11 +262,10 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
             if (options.timeoutMs() <= 0) {
                 return render(template, data);
             }
-            // 限时渲染: 内部渲染跑在守护线程, 到点中断并抛 RenderException
+            // 限时渲染: 内部渲染跑在 worker 线程 (JDK 21+ 虚拟线程 / 17 共享 daemon 池,
+            // 见 startTimeoutWorker), 到点 future.cancel(true) 中断 worker 并抛 RenderException
             FutureTask<Object> future = new FutureTask<>(() -> render(template, data));
-            Thread worker = new Thread(future, "template4j-render-timeout");
-            worker.setDaemon(true);
-            worker.start();
+            startTimeoutWorker(future);
             try {
                 return future.get(options.timeoutMs(), TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
@@ -263,6 +284,134 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
             }
         } finally {
             if (handle != null) handle.remove();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // 限时渲染 worker 线程策略 (round2 §P3: 替换原来每调用一次 new Thread 的固定平台线程)
+    // ------------------------------------------------------------------
+
+    /** 运行时 JDK feature 版本 (决定限时渲染 worker 用虚拟线程还是共享 daemon 池), 静态解析一次。 */
+    private static final int JDK_FEATURE = Runtime.version().feature();
+
+    /** 限时渲染 worker 名前缀: 两种策略保持同一命名格式, 日志/诊断口径一致。 */
+    private static final String TIMEOUT_WORKER_NAME_PREFIX = "template4j-render-timeout-";
+
+    /**
+     * 为限时渲染 ({@code timeoutMs > 0}) 启动 worker 线程执行内部渲染。
+     * 线程策略按运行时 JDK 自适应:
+     * <ul>
+     *   <li>JDK &ge; 21 &rarr; 每次一个虚拟线程 (短阻塞任务的专用形态, 无平台线程创建/栈内存开销);</li>
+     *   <li>JDK 17 &rarr; JVM 级共享 daemon 缓存线程池 (见 {@link LegacyTimeoutWorker})。</li>
+     * </ul>
+     *
+     * <p>对调用方的可观察语义与旧实现 (每调用 {@code new Thread(future, ...)}) 完全一致:
+     * 照旧 {@code future.get(timeout)} / {@code future.cancel(true)}, 中断落在真正执行
+     * {@code future.run()} 的线程上。
+     *
+     * <p><b>JDK 21-only API 的隔离依据</b>: {@code Thread.ofVirtual()} 及相关符号在 JDK 17
+     * 的类库与 javac 里根本不存在 (本仓库 source/target 17, 17 工具链下字面量调用连编译都
+     * 过不了, {@code --release 17} 同样拒绝)。因此 21 分支的全部 21-only 调用收敛在
+     * {@link V21TimeoutWorker} 单独嵌套类里、以反射完成, {@code Method} 句柄在该类初始化时
+     * 一次解析。JVM 类懒加载保证: JDK 17 运行时走 else 分支, {@code V21TimeoutWorker}
+     * 永不被加载/初始化, 反射解析 (以及任何对 21-only 符号的触碰) 都不会发生; 若未来在
+     * 21+ 工具链下把反射改回字面量调用, 该依据同样成立 —— 不加载则不校验, HotSpot 分拆
+     * 校验器对方法体内未解析类型的可赋值性检查也推迟到指令执行时。
+     */
+    private static void startTimeoutWorker(FutureTask<Object> future) {
+        if (JDK_FEATURE >= 21) {
+            V21TimeoutWorker.start(future);
+        } else {
+            LegacyTimeoutWorker.start(future);
+        }
+    }
+
+    /**
+     * JDK &ge; 21 路径: 每次限时渲染一个虚拟线程, 即
+     * {@code Thread.ofVirtual().name(prefix, n).unstarted(future).start()} 的反射形态
+     * (21-only 符号在 17 的 javac 下不存在, 只能反射; 另见 {@link #startTimeoutWorker} 的隔离依据)。
+     *
+     * <p>本类只在 {@code Runtime.version().feature() >= 21} 时被加载/初始化, 反射解析在 17 上
+     * 绝不发生。每次调用新建一个 builder —— builder 非线程安全, 不跨线程复用; 3 次反射调用
+     * 合计微秒级, 远低于旧实现平台线程创建的 0.1-0.5ms。解析/调用失败 (21+ 上不应发生) 时
+     * 回退共享 daemon 池, 限时渲染本身绝不因线程策略失败。
+     */
+    private static final class V21TimeoutWorker {
+        private static final AtomicInteger SEQ = new AtomicInteger();
+        private static final Method OF_VIRTUAL = find(Thread.class, "ofVirtual");
+        private static final Method NAME = find(
+                forNameOrNull("java.lang.Thread$Builder"), "name", String.class, long.class);
+        private static final Method UNSTARTED = find(
+                forNameOrNull("java.lang.Thread$Builder"), "unstarted", Runnable.class);
+
+        private V21TimeoutWorker() { }
+
+        private static Class<?> forNameOrNull(String className) {
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
+
+        private static Method find(Class<?> declaring, String name, Class<?>... params) {
+            if (declaring == null) return null;
+            try {
+                return declaring.getMethod(name, params);
+            } catch (NoSuchMethodException e) {
+                return null;
+            }
+        }
+
+        static void start(FutureTask<Object> future) {
+            if (UNSTARTED == null) {
+                LegacyTimeoutWorker.start(future);
+                return;
+            }
+            try {
+                Object builder = NAME.invoke(OF_VIRTUAL.invoke(null),
+                        TIMEOUT_WORKER_NAME_PREFIX, (long) SEQ.getAndIncrement());
+                // FutureTask 是 Runnable; unstarted 产物 start() 由本线程触发, 与旧版 worker.start() 同点
+                Thread worker = (Thread) UNSTARTED.invoke(builder, future);
+                worker.start();
+            } catch (Throwable failure) {
+                LegacyTimeoutWorker.start(future);
+            }
+        }
+    }
+
+    /**
+     * JDK 17 回退路径: JVM 级共享 daemon 缓存线程池 (cached, 空闲线程默认 60s 后自行终止)。
+     *
+     * <p>static final 直接初始化; 本嵌套类只在 17 分支首次命中时加载 —— 类加载语义本身就是
+     * 懒初始化, 无需额外 holder。池为 JVM 级共享、<b>引擎不负责关闭</b>: daemon 线程不阻塞
+     * JVM 退出; 空闲线程按 keep-alive 消亡后, 对容器热部署场景的 classloader 钉住效应也随之
+     * 释放。代价记录: 与引擎实例无关, 多引擎共享同一池;
+     * {@code future.cancel(true)} 打断的仍是正在执行 {@code future.run()} 的 worker 线程,
+     * 与旧独占线程版语义一致。
+     */
+    private static final class LegacyTimeoutWorker {
+        private static final AtomicInteger SEQ = new AtomicInteger();
+        private static final ExecutorService POOL = Executors.newCachedThreadPool(r -> {
+            Thread thread = new Thread(r, TIMEOUT_WORKER_NAME_PREFIX + SEQ.incrementAndGet());
+            thread.setDaemon(true);
+            return thread;
+        });
+
+        private LegacyTimeoutWorker() { }
+
+        static void start(FutureTask<Object> future) {
+            // future.run() 后清掉本线程可能残留的中断标志: cancel(true) 若打断的是渲染中的
+            // 非阻塞段, 标志会留在池线程上并被"下一个复用此线程的任务"继承 (旧独占线程版随
+            // 线程消亡自然消失, 共享池必须显式清理), 否则后续渲染里任何 park/awaitDone 类
+            // 等待会被陈旧标志误伤。对调用方可见语义零影响 (标志只存在于 worker 线程上)。
+            POOL.execute(() -> {
+                try {
+                    future.run();
+                } finally {
+                    Thread.interrupted(); // 只清标志, 不抛异常
+                }
+            });
         }
     }
 
@@ -359,8 +508,10 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
         }
 
         Object result = singleReturn ? finalResult : strResult;
-        trace(RenderEngine.TraceEvent.of("RENDER_STRING", self.path(),
-                "placeholders=" + keyList.size(), 0, result));
+        if (traceEnabled()) {
+            trace(RenderEngine.TraceEvent.of("RENDER_STRING", self.path(),
+                    "placeholders=" + keyList.size(), 0, result));
+        }
         return result;
     }
 
@@ -392,14 +543,18 @@ public class JsonRenderer implements RenderEngine, RenderEngine.Renderer {
             }
             JSONObject input = UJson.copy(objectValue);
             input.remove("@class");
-            long t0 = System.nanoTime();
+            // 组件计时门: 无 consumer 时跳过 t0 / finally 计时, 零分配零 nanoTime
+            boolean traceComponent = traceEnabled();
+            long t0 = traceComponent ? System.nanoTime() : 0L;
             Object componentResult;
             try {
                 componentResult = component.doRender(input, self);
             } finally {
-                long durMs = (System.nanoTime() - t0) / 1_000_000;
-                trace(RenderEngine.TraceEvent.of("COMPONENT", self.path(),
-                        "@class=" + componentName, durMs, null));
+                if (traceComponent) {
+                    long durMs = (System.nanoTime() - t0) / 1_000_000;
+                    trace(RenderEngine.TraceEvent.of("COMPONENT", self.path(),
+                            "@class=" + componentName, durMs, null));
+                }
             }
             result = componentResult;
         } else {

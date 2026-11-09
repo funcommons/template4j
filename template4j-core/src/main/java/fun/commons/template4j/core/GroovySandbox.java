@@ -19,6 +19,7 @@ import org.codehaus.groovy.ast.stmt.WhileStatement;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.SecureASTCustomizer;
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.kohsuke.groovy.sandbox.GroovyInterceptor;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
 
@@ -41,6 +42,12 @@ import java.util.Set;
  * <p>注意：groovy-sandbox 1.x 的拦截器注册表是 ThreadLocal（每线程独立），只在构建线程注册一次
  * 会让并行渲染线程完全绕过拦截，因此 {@link #eval} 每次 register / unregister；
  * 嵌套 eval 对同一线程重复注册，List.remove 成对抵消，安全。
+ *
+ * <p>编译产物可安全缓存复用：{@link SandboxTransformer} 是<b>编译期</b> AST 重写，
+ * {@code Checker.checked*} 调用点已编进产物 Script 类；运行期检查全部发生在 {@link Whitelist}
+ * 拦截器上，而拦截器是每次 {@code eval} 注册 / 注销的 —— 与脚本对象是否来自缓存无关，
+ * 故缓存命中路径的违规调用依旧被拦截（{@link ScriptEnvironment#sandboxCacheSize()} 所见条目
+ * 只省编译成本，不弱化白名单）。
  */
 final class GroovySandbox {
 
@@ -49,20 +56,35 @@ final class GroovySandbox {
     private final GroovyShell shell = createShell();
     private final GroovyInterceptor interceptor = new Whitelist();
 
-    /** 编译并执行脚本。script 已含 imports 前缀（与默认路径一致的 {@code imports.toCode() + script}）。 */
-    Object eval(String script, Bindings bindings) throws ScriptException {
+    /**
+     * 仅编译不执行。{@link SandboxTransformer} 重写与 {@link SecureASTCustomizer} 循环禁令都在本阶段生效;
+     * 产物 {@link Script} 交给 {@link #eval(Script, Bindings)} 克隆执行（违规脚本如 {@code new File(...)}
+     * 编译可通过，拦截发生在运行期）。script 已含 imports 前缀（与默认路径一致的 {@code imports.toCode() + script}）。
+     */
+    Script compile(String script) throws ScriptException {
+        try {
+            // shell.parse 每次重新编译（内部 caching=false）; 缓存方以 Script 实例为缓存项反复克隆产物类
+            return shell.parse(script, "template4jSandboxScript.groovy");
+        } catch (CompilationFailedException e) {
+            throw new RenderException("/", "{script}", SANDBOX_TAG + ": script rejected: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 执行已编译的 {@link Script}。Script 类线程安全复用、实例不共享：每次经
+     * {@link InvokerHelper#createScript} 新建实例并绑定本调用自己的 Binding（该入口即
+     * {@code GroovyShell.parse} 内部用的同一实例化方式; Groovy 4 的 {@code Script} 没有
+     * {@code newInstance(Binding)} API），因此缓存命中也不会串 bindings。
+     */
+    Object eval(Script compiled, Bindings bindings) throws ScriptException {
         // fne(...) / data('$') 这类 binding 变量的函数式调用以 onMethodCall(script, "名字") 到达,
         // 拦截器需按名放行值为 Func* 实例的 binding; 保存旧值以支持嵌套 eval 恢复
         Set<String> prevCallable = Whitelist.CALLABLE_BINDINGS.get();
         Whitelist.CALLABLE_BINDINGS.set(collectCallableBindings(bindings));
         interceptor.register();
         try {
-            // shell.parse 每次重新编译（内部 caching=false），产物类可被 GC，无 metaspace 泄漏
-            Script parsed = shell.parse(script, "template4jSandboxScript.groovy");
-            parsed.setBinding(new Binding(bindings));
-            return parsed.run();
-        } catch (CompilationFailedException e) {
-            throw new RenderException("/", "{script}", SANDBOX_TAG + ": script rejected: " + e.getMessage(), e);
+            Script instance = InvokerHelper.createScript(compiled.getClass(), new Binding(bindings));
+            return instance.run();
         } catch (SecurityException se) {
             String message = StringUtils.containsIgnoreCase(se.getMessage(), SANDBOX_TAG)
                     ? se.getMessage() : SANDBOX_TAG + ": " + se.getMessage();
@@ -76,6 +98,11 @@ final class GroovySandbox {
             interceptor.unregister();
             Whitelist.CALLABLE_BINDINGS.set(prevCallable);
         }
+    }
+
+    /** 编译并执行脚本（无缓存直跑路径）。script 已含 imports 前缀（与默认路径一致的 {@code imports.toCode() + script}）。 */
+    Object eval(String script, Bindings bindings) throws ScriptException {
+        return eval(compile(script), bindings);
     }
 
     /** bindings 中值为 Func* 实例的名字（data / vars / render / load / cast / fne）。 */

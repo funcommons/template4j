@@ -8,6 +8,7 @@ import fun.commons.template4j.core.beans.FuncFne;
 import fun.commons.template4j.core.beans.FuncLoad;
 import fun.commons.template4j.core.beans.FuncRender;
 import fun.commons.template4j.core.beans.FuncVars;
+import groovy.lang.Script;
 
 import javax.script.Bindings;
 import javax.script.Compilable;
@@ -26,6 +27,11 @@ import java.util.Map;
  * addImport 递增版本号使旧条目按 key 自然失效（不必主动 clear）。缓存的是编译产物而非求值结果，
  * bindings 每次 eval 重建后传入，故跨实例 / 跨 SelfObject 复用同一编译脚本无状态问题。
  * 缓存配置在实例构造时读取（非 static），同 JVM 内改属性后新建实例即生效。
+ *
+ * <p>沙箱路径同构缓存：开启 sandbox 后额外缓存 {@link GroovySandbox#compile} 的 {@link Script}
+ * 产物，key / 属性（{@code template4j.scriptCache.enabled} / {@code .maxEntries}）/ 构造时机
+ * 与默认路径完全一致。SandboxTransformer 是编译期重写，缓存命中仍每次走
+ * {@link GroovySandbox#eval(Script, javax.script.Bindings)} 的运行期拦截器，安全语义不变。
  */
 final class ScriptEnvironment {
 
@@ -41,6 +47,11 @@ final class ScriptEnvironment {
     private final boolean scriptCacheEnabled;
     private final Compilable compilable;
     private final Cache<String, CompiledScript> scriptCache;
+    /**
+     * 沙箱路径的 {@link Script} 编译缓存，与 {@link #scriptCache} 同构（同 key 规则、同属性、
+     * 构造时读取）。enabled=false 时永远不 put，空缓存只为让探针 / clear 无需判空。
+     */
+    private final Cache<String, Script> sandboxScriptCache;
     /** 沙箱环境; null = 关闭 (默认), 走 jsr223 + 编译缓存路径。开启后走 {@link GroovySandbox} 独立 eval。 */
     private volatile GroovySandbox sandbox;
     /** imports 内容版本号，addImport 递增，作为缓存 key 前缀。 */
@@ -50,6 +61,7 @@ final class ScriptEnvironment {
         this.scriptCacheEnabled = Boolean.parseBoolean(System.getProperty(PROP_ENABLED, "true"));
         this.compilable = GROOVY_ENGINE instanceof Compilable engine ? engine : null;
         this.scriptCache = Caffeine.newBuilder().maximumSize(maxEntries()).build();
+        this.sandboxScriptCache = Caffeine.newBuilder().maximumSize(maxEntries()).build();
     }
 
     void registerBean(String name, Object bean) {
@@ -73,7 +85,18 @@ final class ScriptEnvironment {
     Object eval(String script, SelfObject self) throws ScriptException {
         GroovySandbox sandbox = this.sandbox;
         if (sandbox != null) {
-            return sandbox.eval(imports.toCode() + script, buildBindings(self));
+            if (!scriptCacheEnabled) {
+                return sandbox.eval(imports.toCode() + script, buildBindings(self));
+            }
+            String key = importsVersion + "\0" + script;
+            Script compiled = sandboxScriptCache.getIfPresent(key);
+            if (compiled == null) {
+                // miss 即编译并放入缓存（先于执行）: SandboxTransformer 重写在编译期,
+                // 违规脚本的编译产物同样入缓存, 运行期拦截交给 eval 内每次注册的白名单拦截器
+                compiled = sandbox.compile(imports.toCode() + script);
+                sandboxScriptCache.put(key, compiled);
+            }
+            return sandbox.eval(compiled, buildBindings(self));
         }
         Bindings bindings = buildBindings(self);
         if (!scriptCacheEnabled || compilable == null) {
@@ -91,6 +114,16 @@ final class ScriptEnvironment {
     int scriptCacheSize() {
         scriptCache.cleanUp();
         return (int) scriptCache.estimatedSize();
+    }
+
+    /** 沙箱缓存条目数探针（cleanUp 后 estimatedSize, 与 {@link #scriptCacheSize()} 同构）。 */
+    int sandboxCacheSize() {
+        sandboxScriptCache.cleanUp();
+        return (int) sandboxScriptCache.estimatedSize();
+    }
+
+    void clearSandboxCache() {
+        sandboxScriptCache.invalidateAll();
     }
 
     void clearScriptCache() {
