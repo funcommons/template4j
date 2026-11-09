@@ -27,6 +27,21 @@ class StreamControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    /**
+     * hello 事件在 StreamingResponseBody 的 lambda 中写出, 由 Spring 异步线程执行;
+     * MockMvc {@code andReturn()} 的响应快照可能先于 lambda 首次 flush
+     * (CI 慢机实绩 065b0f5: 拿到空响应)。有界轮询 (最长 ~2s) 消除该竞态。
+     */
+    private static String awaitHello(MvcResult result)
+            throws InterruptedException, java.io.UnsupportedEncodingException {
+        String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        for (int i = 0; i < 40 && !response.contains("event: hello"); i++) {
+            Thread.sleep(50);
+            response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        }
+        return response;
+    }
+
     @Test
     void streamEndpointReturnsTextEventStreamContentType() throws Exception {
         // 验证响应是 SSE content-type (即使 MockMvc 拿到的是部分内容)
@@ -43,9 +58,8 @@ class StreamControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        // MockMvc 行为: StreamingResponseBody 可能只同步执行一部分,
-        // 但 hello 事件总是先写,只要看到 hello 就算路由可达
+        String response = awaitHello(result);
+        // MockMvc 行为: StreamingResponseBody 异步执行, hello 为首个事件, 可达即有 hello
         Assertions.assertTrue(response.contains("event: hello"),
                 "expected hello event, got: " + response);
     }
@@ -65,7 +79,7 @@ class StreamControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String response = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        String response = awaitHello(result);
         Assertions.assertTrue(response.contains("event: hello"),
                 "expected hello event, got: " + response);
     }
