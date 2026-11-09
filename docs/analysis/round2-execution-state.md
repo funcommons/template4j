@@ -22,10 +22,11 @@
 
 **三端终态**：core 1635 / site 200 / frontend vitest 33 全绿；门禁 LINE 95.74% / BRANCH 90.48%；CodeQL 0 error。
 
-## 仓库设置事项（唯一遗留，需用户手动）
+## 仓库设置事项（已闭环）
 
-- Settings → Advanced Security → **Dependency graph** 勾选启用 → dependency-review 门禁自动转绿 → PR #1 可合并。API 无法代开。
-- 已通过 API 开启：Dependabot vulnerability alerts + automated security fixes。
+- Dependency graph：用户确认**本来就是开的**；早前 dependency-review 报 "not supported" 是 graph 尚未为 PR 的全新 manifest 建 SHA 快照（由 push 事件逐步填充），后续 run 自动恢复。
+- **门禁首战战果**：连出三层真实 high 漏洞并全部修复——@vue/server-renderer 3.5.39 XSS（GHSA-g2v6-rqmx-r4w6）→ axios 1.18.1 两条（GHSA-542g-h47m-68v8 / GHSA-3pq3-5fj3-cg6v）→ follow-redirects 1.16.0 三条（GHSA-8r9p-f939-6h3c 等）。升级链：vue 3.5.45（4c74637）→ axios 1.21.0（ceb97a5）→ follow-redirects 1.16.3（d48b817）。**PR #1 CI 11/11 全绿，可合并。**
+- Dependabot vulnerability alerts + automated security fixes：API 开启 ✅。
 
 ## 立项池（本轮不做，已有诊断）
 
