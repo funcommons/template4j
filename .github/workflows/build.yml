@@ -228,14 +228,33 @@ jobs:
         run: |
           cd template4j-site/frontend
           nohup npm run dev -- --host 127.0.0.1 --port 5173 --strictPort > "$RUNNER_TEMP/vite.log" 2>&1 &
+          started=0
           for _ in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5173/ || true)
-            if [ "$code" != "000" ]; then echo "vite is up (HTTP $code)"; exit 0; fi
+            if [ "$code" != "000" ]; then echo "vite is up (HTTP $code)"; started=1; break; fi
             sleep 2
           done
-          echo "vite did not start; last log lines:"
-          tail -50 "$RUNNER_TEMP/vite.log"
-          exit 1
+          if [ "$started" != "1" ]; then
+            echo "vite did not start; last log lines:"
+            tail -50 "$RUNNER_TEMP/vite.log"
+            exit 1
+          fi
+          # 预热收敛: 冷启动首击会撞 504 (Outdated Optimize Dep) —— element-plus 经
+          # unplugin resolver 懒发现, smoke 首页加载触发 re-optimization, 懒加载视图
+          # (Learn.vue 等) 动态导入失败 (vite 8 CI 实绩, 2 issues 同根)。逐个 transform
+          # 全部视图让依赖预构建收敛, 全部 200 后再跑 smoke。预热失败不在此处报警,
+          # 真实错误交由 smoke 呈现。
+          set +e
+          for _ in $(seq 1 20); do
+            ok=1
+            for v in Home Learn Try Docs Showcase Mcp Perf Playground; do
+              c=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:5173/src/views/$v.vue" || true)
+              if [ "$c" != "200" ]; then ok=0; fi
+            done
+            if [ "$ok" = "1" ]; then echo "dep optimization settled (all views 200)"; break; fi
+            sleep 2
+          done
+          set -e
 
       - name: Run e2e smoke (PR / push)
         if: github.event_name != 'schedule'
