@@ -29,7 +29,7 @@ jobs:
           cache: 'maven'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: java-kotlin
           # 不启用 queries: security-extended — Groovy/反射会有很多 false positive
@@ -39,6 +39,6 @@ jobs:
         run: mvn -B -pl template4j-core -am compile -DskipTests
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:java-kotlin"
