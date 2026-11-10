@@ -11,7 +11,7 @@ hero:
       link: /guide/
     - theme: alt
       text: 组件总览
-      link: /components/
+      link: /components
     - theme: alt
       text: GitHub
       link: https://github.com/funcommons/template4j

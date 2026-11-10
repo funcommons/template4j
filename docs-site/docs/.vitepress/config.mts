@@ -10,7 +10,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '快速开始', link: '/guide/' },
-      { text: '组件总览', link: '/components/' },
+      { text: '组件总览', link: '/components' },
       { text: 'GitHub', link: 'https://github.com/funcommons/template4j' }
     ],
     sidebar: {
@@ -20,10 +20,10 @@ export default defineConfig({
           items: [{ text: '快速开始', link: '/guide/' }]
         }
       ],
-      '/components/': [
+      '/components': [
         {
           text: '参考',
-          items: [{ text: '组件总览', link: '/components/' }]
+          items: [{ text: '组件总览', link: '/components' }]
         }
       ]
     },
