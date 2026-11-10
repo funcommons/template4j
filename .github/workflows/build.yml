@@ -29,7 +29,7 @@ jobs:
 
       - name: Upload JaCoCo coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-core
           path: template4j-core/target/site/jacoco/
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload JaCoCo site coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-site
           path: template4j-site/target/site/jacoco/
@@ -110,7 +110,7 @@ jobs:
         run: mvn -B -Pshade -pl template4j-core -am package -DskipTests
 
       - name: Upload fat jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: template4j-core-shaded
           path: template4j-core/target/template4j-core-shaded.jar
@@ -274,7 +274,7 @@ jobs:
 
       - name: Upload e2e artifacts (screenshots & reports)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-artifacts
           path: |
