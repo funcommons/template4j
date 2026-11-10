@@ -31,6 +31,40 @@ updates:
       - dependency-name: "org.springframework.boot:*"
         update-types: ["version-update:semver-major"]
 
+  # 前端 npm (此前只有"出漏洞才修"的 security updates, 无例行版本更新:
+  # 2026-11-09 的 vue→axios→follow-redirects 三层漏洞链即此类缺口)
+  - package-ecosystem: "npm"
+    directory: "/template4j-site/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:53"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "deps"
+    groups:
+      # patch 打包 1 个 PR; minor / major 单独开 (vite/vitest 大版本需配套升级评估)
+      npm-patch:
+        update-types:
+          - "patch"
+      npm-minor:
+        update-types:
+          - "minor"
+      npm-major:
+        update-types:
+          - "major"
+    ignore:
+      # vite / vitest 大版本与 plugin-vue/unplugin 配套联动, 手动协调升级
+      # (2026-11 实绩: dependabot 单独 bump vite 5→8 打红 frontend+e2e)
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"

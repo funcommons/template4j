@@ -33,3 +33,8 @@
 - 全局 box-sizing reset（影响全站盒模型，需全量回归）
 - <600px 移动端汉堡 drawer（导航 @480/380 仍溢出，smoke 暂不检查该宽度）
 - P4 renderString O(k·n) / A4 singleReturn 类型漂移（方案 §观察池，等真实信号）
+- json-schema-validator 1.5.6 → 3.x（2026-11-10 评估否决：3.0.9 运行期 NoClassDefFound
+  — SpecVersion$VersionFlag / JsonSchema 类结构重构，升级需迁移研究单独立项；
+  现版本 1.5.6 无已知漏洞告警）
+- Spring Boot 4 / Framework 7 升级（.trivyignore 两条豁免 CVE-2026-47884/47890 的解除条件；
+  补丁仅存在于 7.0.9+，6.2 OSS 线终止于 6.2.19）

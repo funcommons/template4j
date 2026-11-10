@@ -1,23 +1,30 @@
 # Branch protection policy for `main`
 
-> 配置入口：GitHub repo → Settings → Branches → Branch protection rules → Add rule
+> **已启用 (2026-11-10, 经 API 配置)**。单人维护者阶段采用修正版:
+> 原初稿的 `approvals:1 + 禁 bypass` 在 GitHub 上是死锁 (无法 approve 自己的 PR,
+> 连管理员也会被挡), 必改 `approvals:0 + 允许 admin bypass`。多人协作时再收紧。
 
-## Required settings
+## Required settings (实际生效配置)
 
 - **Branch name pattern**: `main`
 - ✅ Require a pull request before merging
-  - Required approvals: **1**
-  - Dismiss stale approvals on new push: ✅
-  - Require review from Code Owners: ✅
+  - Required approvals: **0** (单人阶段; 多人后升 1)
+  - Dismiss stale approvals on new push: ❌ (无 approval 可 dismiss)
+  - Require review from Code Owners: ❌ (CODEOWNERS 文件已备, 多人后启用)
 - ✅ Require status checks to pass
-  - Require branches up to date: ✅
-  - Required checks:
-    - `build (JDK 17, ubuntu-latest)`
-    - `build (JDK 21, ubuntu-latest)`
-    - `build (JDK 17, macos-latest)`
+  - Require branches up to date: ✅ (`strict: true`)
+  - Required checks (与 build/codeql/security-scan 实际 job 名一致):
+    - `core (JDK 17, ubuntu)`
+    - `site (JDK 17, ubuntu)`
+    - `frontend (node 22, ubuntu)`
+    - `e2e (smoke on PR/push, full regression nightly)`
+    - `shade (fat jar)`
+    - `CodeQL`
+    - `Dependency review (PR diff gate, fail on high)`
 - ✅ Require conversation resolution before merging
-- ✅ Require linear history
-- ✅ Do not allow bypassing the above settings
+- ✅ Require linear history (`allow_merge_commit: false`, 仅 rebase / squash)
+- ❌ Do not allow bypassing the above settings (**admin 可 bypass** — 单人阶段必要)
+- Allow force push / deletions: ❌
 
 ## Code Owners
 
