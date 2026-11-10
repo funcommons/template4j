@@ -1,0 +1,56 @@
+name: docs-site
+
+# 主页文档站 (VitePress) → GitHub Pages
+# 模式与 funcommons/framework4j 一致: build_type=workflow, Actions 构建+部署
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs-site/**'
+      - '.github/workflows/docs-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: docs-site/package-lock.json
+
+      # --registry 覆盖 lockfile 里的 npmmirror resolved URL (与 build.yml 同理:
+      # 镜像故障时 CI 不陪葬)
+      - name: Install dependencies
+        working-directory: docs-site
+        run: npm ci --registry=https://registry.npmjs.org
+
+      - name: Build VitePress site
+        working-directory: docs-site
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs-site/docs/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

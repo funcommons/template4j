@@ -59,3 +59,7 @@ test-results/
 
 # Claude (session-local state; project skill lives in skills/template4j)
 .claude/
+
+# VitePress (docs-site)
+docs-site/docs/.vitepress/cache/
+docs-site/docs/.vitepress/dist/
