@@ -88,6 +88,17 @@ java -jar template4j-core-shaded.jar mcp
 - `codeReplaceAt` 改为单遍状态机
 - 删除 `URegex` 工具类(零生产调用者)
 
+## 🔒 2026-11 更新（GitHub 首发收录）
+
+0.5.0 于 2026-11-10 正式发布。7 月开发完成后的四个月里，工程重点从功能转向**安全与工程化**：
+
+- **依赖漏洞清零**：Dependabot 告警 21 → 0（3 critical / 3 high / 12 moderate / 3 low 全部修复——前端 vue/axios/follow-redirects 链、vite/vitest/tinypool(RCE)/vue-i18n 系，maven 侧 Spring Boot 3.5.16 + jackson 2.21.8 / tomcat 10.1.59 安全钉版）。
+- **CI/CD 门禁体系**：PR diff 依赖审查、全量 Trivy（CRITICAL/HIGH 阻断）、OWASP dependency-check、CodeQL、frontend/e2e jobs、nightly 回归；JaCoCo 覆盖率棘轮门禁（core 95%/90%、site 91%/82%）。
+- **引擎安全强化**：RateLimitFilter XFF 伪造绕过与无界桶表修复、Groovy 沙箱导入收敛 + 编译缓存、rest 响应注入语义钉死。
+- **前端现代化**：vite 8 (rolldown) / vitest 5 / vue-i18n 11 / Node 22。
+
+详见 `CHANGELOG.md` 0.5.0 段。
+
 ## 📚 升级指南
 
 0.4 → 0.5 零破坏性变更。Maven 用户:

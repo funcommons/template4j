@@ -4,12 +4,30 @@ template4j 项目的所有显著变更记录。格式基于 [Keep a Changelog](h
 
 ---
 
-## [0.5.0] - 2026-07-14
+## [0.5.0] - 2026-11-10
 
 ### Version
 
-- `0.4.0` → `0.5.0-SNAPSHOT` (parent + core + web + demo)。
+- `0.4.0` → `0.5.0` (parent + core + web + demo)。GitHub 仓库首发: 2026-07 开发完成, 2026-11-10 随安全清零与 CI 门禁体系一起正式发布。
 
+### Added (2026-11 · 工程化与安全基建)
+
+- **CI/CD 门禁体系** (GitHub Actions): PR diff 依赖审查 (`dependency-review`, high 阻断) / 全量 Trivy 文件扫描 (CRITICAL/HIGH 阻断) / OWASP dependency-check (CVSS≥9) / CodeQL / frontend + e2e jobs / nightly 全量回归。
+- **JaCoCo BUNDLE 覆盖率门禁**: core LINE 0.95 / BRANCH 0.90, site LINE 0.91 / BRANCH 0.82 (棘轮式, 随提升上调)。
+- **Dependabot + vulnerability alerts + automated security fixes** 全开启。
+
+### Security (2026-11 · 依赖漏洞清零: Dependabot 21 → 0)
+
+- 前端链: vue/@vue/server-renderer XSS → axios 两条 → follow-redirects 三条; vite/vitest/tinypool(RCE)/vue-i18n XSS/uuid/glob 系全部升级到位。
+- maven 链: Spring Boot 3.4.1 → **3.5.16** (tomcat CVE-2025-24813 RCE / spring-webmvc / jackson 随 BOM); jackson-bom **2.21.8** + tomcat-embed **10.1.59** 安全钉版 (Boot 4 升级时评估移除)。
+- RateLimitFilter 两处真实缺陷: XFF 伪造绕过 (trust-proxy/trusted-proxies CIDR 语义, 默认 fail-closed) + 桶表无界增长 (Caffeine LRU)。
+- Groovy 沙箱: 默认导入收敛 (`toSandboxCode()`) + 编译产物 Caffeine 缓存 (消除每 eval 重编译的性能悬崖); rest 响应注入语义钉死测试 (数据≠模板)。
+
+### Changed (2026-11)
+
+- 前端现代化: vite 8 (rolldown) / vitest 5 / @vitejs/plugin-vue 6 / vue-i18n 11 / element-plus 生态跟进。
+- CI: Node 22 / actions/checkout v7 / upload-artifact v7 / codeql-action v4 / dependency-review-action v5 / setup-node v7; npm ci 强制官方源 (lockfile 镜像 URL 不再阻断 CI)。
+- 引擎细节: 沙箱脚本缓存、trace 零分配守卫 (`traceEnabled()`)、超时渲染虚拟线程 (JDK 21+, 17 回退共享池)、`ScriptCacheStats` 能力接口、`renderJson` overload、Cli 参数缺失守卫。
 
 ### Added (组件 — Tier 1 编排)
 
