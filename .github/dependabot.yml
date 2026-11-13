@@ -65,6 +65,33 @@ updates:
       - dependency-name: "vitest"
         update-types: ["version-update:semver-major"]
 
+  # 文档站 npm (vitepress 工具链; vite 由 package.json overrides 钉 ^6.4.6 —
+  # 2026-11-13 实绩: vitepress 1.6.4 原生 vite 5.4 撞 9 条 dev-server 通报,
+  # overrides 强制 6.4.6 修复且 vitepress 1.6.4 在 vite 6 上构建正常)
+  - package-ecosystem: "npm"
+    directory: "/docs-site"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "05:23"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docs"
+    commit-message:
+      prefix: "deps"
+    groups:
+      npm-patch:
+        update-types:
+          - "patch"
+      npm-minor:
+        update-types:
+          - "minor"
+      npm-major:
+        update-types:
+          - "major"
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
