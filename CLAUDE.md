@@ -27,7 +27,7 @@ There is no separate lint step; the build uses `maven-compiler-plugin` with JDK 
 
 Tests live under `src/test/java/fun/commons/template4j/{core,utils,arch}/`. The `core` package mirrors `main/.../core`. Core surefire sets `template4j.rest.allowed-hosts=127.0.0.1,localhost,0.0.0.0` as a system property so unit tests that spin up `com.sun.net.httpserver.HttpServer` on loopback pass the RestRenderer SSRF guard.
 
-CI workflows: `.github/workflows/security-scan.yml` runs OWASP dependency-check (`-DfailBuildOnCVSS=9`) plus a Trivy filesystem scan.
+CI workflows: `.github/workflows/security-scan.yml` runs a Trivy filesystem scan (CRITICAL/HIGH blocking) on main pushes plus a PR diff dependency review (high severity blocks); OWASP dependency-check was removed — without an NVD_API_KEY its NVD sync was rate-limited and chronically unstable, so blocking coverage is carried by Trivy + dependency review + Dependabot alerts.
 
 Profiles: `-Pbenchmark` runs `PerformanceBenchmarkTest` (default skipped). `-Pshade` produces `template4j-core-shaded.jar` with `Cli` as main class (~16MB).
 

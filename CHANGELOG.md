@@ -4,6 +4,12 @@ template4j 项目的所有显著变更记录。格式基于 [Keep a Changelog](h
 
 ---
 
+## [Unreleased]
+
+### Removed
+
+- **OWASP dependency-check CI job**: 无 NVD_API_KEY 时 NVD 限流 (5 请求/30s) 导致全量同步 30+ 分钟且慢日必超时, 门禁实际只能 advisory 挂着。漏洞阻断职责由三层免费防线承担: Trivy fs 扫描 (CRITICAL/HIGH 阻断, Trivy DB 免费自更新) + PR Dependency review (required, high+) + Dependabot alerts (持续在线)。如未来需要 NVD/CPE 深度视角, 前置条件是配置 NVD_API_KEY。
+
 ## [0.5.0] - 2026-11-10
 
 ### Version

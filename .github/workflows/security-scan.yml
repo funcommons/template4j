@@ -28,64 +28,10 @@ jobs:
         with:
           fail-on-severity: high
 
-  dependency-check:
-    name: OWASP dependency-check (fail on CVSS >= 9)
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    # 60min: 无 NVD_API_KEY 时全量同步物理下限 ~30+ 分钟 (限流 5 请求/30s),
-    # NVD 慢日 (524) 下 40min 不够 (2026-11 实绩); NVD 数据库缓存跨 run 收敛,
-    # 配置 NVD_API_KEY secret 后可大幅缩短。
-    timeout-minutes: 60
-    # 暂行警示不阻断: 无 key 的 NVD 同步在慢日连 60min 都不够 (2026-11-10 两次超时
-    # 实绩), 缓存仍在跨 run 收敛。失败保留警示注记不没信号, 但不再把 main 打红。
-    # >>> 移除条件: 用户配置 NVD_API_KEY secret 后删除本行 (gate 恢复阻断)。 <<<
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-
-      # NVD 数据库按周缓存: 首跑需全量拉取(可达 30min+), 之后走增量更新。
-      # restore-keys 取最近一周缓存续用, 新周键落盘形成滚动快照。
-      - name: Compute NVD cache week
-        id: nvdweek
-        run: echo "week=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache NVD database
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: odc-nvd-${{ steps.nvdweek.outputs.week }}
-          restore-keys: |
-            odc-nvd-
-
-      # 任一依赖 CVSS >= 9 阻断；关闭 RetireJS 分析器避免扫描超时。
-      # failOnError=false: NVD API 偶发 524/限流不终止分析 (2026-11-09 首跑实绩:
-      # 无 key 全量拉取撞上 NVD 524 → NoDataException 致命失败); 该次检测能力降级
-      # (仅 Central 元数据), 随缓存累积与每周增量收敛。
-      # NVD_API_KEY 为可选 secret (nvd.nist.gov 免费申请, `gh secret set NVD_API_KEY`),
-      # 未配置时视为无 key, 不影响流程。
-      - name: Run dependency-check
-        run: >
-          mvn -q org.owasp:dependency-check-maven:10.0.4:check
-          -DfailBuildOnCVSS=9 -DretireJsAnalyzerEnabled=false
-          -DfailOnError=false -DnvdApiKey="${NVD_API_KEY}"
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-
-      - name: Upload dependency-check report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: dependency-check-report
-          path: '**/dependency-check-report.html'
-          retention-days: 30
+  # OWASP dependency-check 已移除 (2026-11-13): 无 NVD_API_KEY 时 NVD 限流
+  # (5 请求/30s) 下全量同步 30+ 分钟且慢日必超时, 要么常驻 advisory 无牙,
+  # 要么依赖用户申请 key。阻断职责由 Trivy (CRITICAL/HIGH, Trivy DB 免费自更新)
+  # + PR Dependency review (required, high+) + Dependabot alerts 三层承担。
 
   trivy-fs:
     name: Trivy filesystem scan (CRITICAL/HIGH blocking)
